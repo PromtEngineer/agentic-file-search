@@ -6,9 +6,9 @@ from .models import Action, ActionType, ToolCallAction, Tools
 from .fs import read_file, grep_file_content, glob_paths
 
 TOOLS: dict[Tools, Callable] = {
-    "read": read_file, 
+    "read": read_file,
     "grep": grep_file_content,
-    "glob": glob_paths
+    "glob": glob_paths,
 }
 
 SYSTEM_PROMPT = """
@@ -26,17 +26,26 @@ Every time, you will be asked to take one of the following actions:
 Choose the action based on the current situation, inferred from the previous chat history.
 """
 
+
 class FsExplorerAgent:
     def __init__(self, api_key: str | None = None):
         if api_key is None:
             api_key = os.getenv("GOOGLE_API_KEY")
         if api_key is None:
-            raise ValueError("GOOGLE_API_KEY not found within the current environment: please export it or provide it to the class constructor.")
-        self._client = GenAIClient(api_key=api_key, http_options=HttpOptions(api_version="v1beta"))
-        self._chat_history: list[Content] = [Content(role="system", parts=[Part.from_text(text=SYSTEM_PROMPT)])]
-    
+            raise ValueError(
+                "GOOGLE_API_KEY not found within the current environment: please export it or provide it to the class constructor."
+            )
+        self._client = GenAIClient(
+            api_key=api_key, http_options=HttpOptions(api_version="v1beta")
+        )
+        self._chat_history: list[Content] = [
+            Content(role="system", parts=[Part.from_text(text=SYSTEM_PROMPT)])
+        ]
+
     def configure_task(self, task: str) -> None:
-        self._chat_history.append(Content(role="user", parts=[Part.from_text(text=task)]))
+        self._chat_history.append(
+            Content(role="user", parts=[Part.from_text(text=task)])
+        )
 
     async def take_action(self) -> tuple[Action, ActionType] | None:
         response = await self._client.aio.models.generate_content(
@@ -45,7 +54,7 @@ class FsExplorerAgent:
             config={
                 "response_mime_type": "application/json",
                 "response_json_schema": Action.model_json_schema(),
-            }
+            },
         )
         if response.candidates is not None:
             if response.candidates[0].content is not None:
@@ -54,14 +63,23 @@ class FsExplorerAgent:
                 action = Action.model_validate_json(response.text)
                 if action.to_action_type() == "toolcall":
                     toolcall = cast(ToolCallAction, action.action)
-                    self.call_tool(tool_name=toolcall.tool_name, tool_input=toolcall.to_fn_args())
+                    self.call_tool(
+                        tool_name=toolcall.tool_name, tool_input=toolcall.to_fn_args()
+                    )
                 return action, action.to_action_type()
-        return None 
-    
+        return None
+
     def call_tool(self, tool_name: Tools, tool_input: dict[str, Any]) -> None:
         try:
             result = TOOLS[tool_name](**tool_input)
         except Exception as e:
             result = f"An error occurred while calling tool {tool_name} with {tool_input}: {e}"
-        self._chat_history.append(Content(role="user", parts=[Part.from_text(text=f"Tool result for {tool_name}:\n\n{result}")]))
+        self._chat_history.append(
+            Content(
+                role="user",
+                parts=[
+                    Part.from_text(text=f"Tool result for {tool_name}:\n\n{result}")
+                ],
+            )
+        )
         return None

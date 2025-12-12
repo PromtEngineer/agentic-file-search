@@ -5,9 +5,9 @@ build-backend = "uv_build"
 [project]
 name = "fs-explorer"
 version = "0.1.0"
-description = "Add your description here"
+description = "Explore and understand your filesystem better with AI."
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = [
     "google-genai>=1.55.0",
     "llama-index-workflows>=2.11.5",
@@ -16,6 +16,15 @@ dependencies = [
 
 [tool.uv.build-backend]
 module-name = "fs_explorer"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.5.0",
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+    "ruff>=0.14.9",
+    "ty>=0.0.1a33",
+]
 
 [project.scripts]
 explore = "fs_explorer.main:app"
