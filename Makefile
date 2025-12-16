@@ -1,4 +1,4 @@
-.PHONY: test lint format format-check typecheck
+.PHONY: test lint format format-check typecheck build
 
 all: test lint format typecheck
 

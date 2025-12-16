@@ -1,11 +1,17 @@
 from workflows import Workflow, Context, step
-from workflows.events import StartEvent, StopEvent, Event
+from workflows.events import (
+    StartEvent,
+    StopEvent,
+    Event,
+    InputRequiredEvent,
+    HumanResponseEvent,
+)
 from workflows.resource import Resource
 from pydantic import BaseModel
 from typing import Annotated, cast, Any
 
 from .agent import FsExplorerAgent
-from .models import GoDeeperAction, ToolCallAction, StopAction
+from .models import GoDeeperAction, ToolCallAction, StopAction, AskHumanAction
 from .fs import describe_dir_content
 
 AGENT = FsExplorerAgent()
@@ -31,6 +37,15 @@ class ToolCallEvent(Event):
     reason: str
 
 
+class AskHumanEvent(InputRequiredEvent):
+    question: str
+    reason: str
+
+
+class HumanAnswerEvent(HumanResponseEvent):
+    response: str
+
+
 class ExplorationEndEvent(StopEvent):
     final_result: str | None = None
     error: str | None = None
@@ -47,7 +62,7 @@ class FsExplorerWorkflow(Workflow):
         ev: InputEvent,
         ctx: Context[WorkflowState],
         agent: Annotated[FsExplorerAgent, Resource(get_agent)],
-    ) -> ExplorationEndEvent | GoDeeperEvent | ToolCallEvent:
+    ) -> ExplorationEndEvent | GoDeeperEvent | ToolCallEvent | AskHumanEvent:
         async with ctx.store.edit_state() as state:
             state.intial_task = ev.task
         dirdescription = describe_dir_content(".")
@@ -72,6 +87,10 @@ class FsExplorerWorkflow(Workflow):
                 reason=action.reason,
             )
             ctx.write_event_to_stream(res)
+        elif action_type == "askhuman":
+            askhuman = cast(AskHumanAction, action.action)
+            # this event is written to the stream by default
+            res = AskHumanEvent(question=askhuman.question, reason=action.reason)
         else:
             stopaction = cast(StopAction, action.action)
             res = ExplorationEndEvent(final_result=stopaction.final_result)
@@ -83,7 +102,7 @@ class FsExplorerWorkflow(Workflow):
         ev: GoDeeperEvent,
         ctx: Context[WorkflowState],
         agent: Annotated[FsExplorerAgent, Resource(get_agent)],
-    ) -> ExplorationEndEvent | ToolCallEvent | GoDeeperEvent:
+    ) -> ExplorationEndEvent | ToolCallEvent | GoDeeperEvent | AskHumanEvent:
         state = await ctx.store.get_state()
         dirdescription = describe_dir_content(state.current_directory)
         agent.configure_task(
@@ -107,6 +126,48 @@ class FsExplorerWorkflow(Workflow):
                 reason=action.reason,
             )
             ctx.write_event_to_stream(res)
+        elif action_type == "askhuman":
+            askhuman = cast(AskHumanAction, action.action)
+            # this event is written to the stream by default
+            res = AskHumanEvent(question=askhuman.question, reason=action.reason)
+        else:
+            stopaction = cast(StopAction, action.action)
+            res = ExplorationEndEvent(final_result=stopaction.final_result)
+        return res
+
+    @step
+    async def receive_human_answer(
+        self,
+        ev: HumanAnswerEvent,
+        ctx: Context[WorkflowState],
+        agent: Annotated[FsExplorerAgent, Resource(get_agent)],
+    ) -> ExplorationEndEvent | ToolCallEvent | GoDeeperEvent | AskHumanEvent:
+        state = await ctx.store.get_state()
+        agent.configure_task(
+            f"Human response to your question: {ev.response}\n\nBased on it, proceed with you exploration based on the original task: {state.intial_task}"
+        )
+        result = await agent.take_action()
+        if result is None:
+            return ExplorationEndEvent(error="Could not produce action to take")
+        action, action_type = result
+        if action_type == "godeeper":
+            godeeper = cast(GoDeeperAction, action.action)
+            res = GoDeeperEvent(directory=godeeper.directory, reason=action.reason)
+            async with ctx.store.edit_state() as state:
+                state.current_directory = godeeper.directory
+            ctx.write_event_to_stream(res)
+        elif action_type == "toolcall":
+            toolcall = cast(ToolCallAction, action.action)
+            res = ToolCallEvent(
+                tool_name=toolcall.tool_name,
+                tool_input=toolcall.to_fn_args(),
+                reason=action.reason,
+            )
+            ctx.write_event_to_stream(res)
+        elif action_type == "askhuman":
+            askhuman = cast(AskHumanAction, action.action)
+            # this event is written to the stream by default
+            res = AskHumanEvent(question=askhuman.question, reason=action.reason)
         else:
             stopaction = cast(StopAction, action.action)
             res = ExplorationEndEvent(final_result=stopaction.final_result)
@@ -118,7 +179,7 @@ class FsExplorerWorkflow(Workflow):
         ev: ToolCallEvent,
         ctx: Context[WorkflowState],
         agent: Annotated[FsExplorerAgent, Resource(get_agent)],
-    ) -> ExplorationEndEvent | ToolCallEvent | GoDeeperEvent:
+    ) -> ExplorationEndEvent | ToolCallEvent | GoDeeperEvent | AskHumanEvent:
         agent.configure_task(
             "Given the result from the tool call you just performed, what action should you take next?"
         )
@@ -140,6 +201,10 @@ class FsExplorerWorkflow(Workflow):
                 reason=action.reason,
             )
             ctx.write_event_to_stream(res)
+        elif action_type == "askhuman":
+            askhuman = cast(AskHumanAction, action.action)
+            # this event is written to the stream by default
+            res = AskHumanEvent(question=askhuman.question, reason=action.reason)
         else:
             stopaction = cast(StopAction, action.action)
             res = ExplorationEndEvent(final_result=stopaction.final_result)

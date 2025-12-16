@@ -7,7 +7,14 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.console import Console
 
-from .workflow import workflow, InputEvent, ToolCallEvent, GoDeeperAction
+from .workflow import (
+    workflow,
+    InputEvent,
+    ToolCallEvent,
+    GoDeeperEvent,
+    AskHumanEvent,
+    HumanAnswerEvent,
+)
 
 app = Typer()
 
@@ -28,8 +35,8 @@ async def run_workflow(task: str):
                 )
                 console.print(panel)
                 status.update("Working on the next move...")
-            elif isinstance(event, GoDeeperAction):
-                status.update("Tool calling...")
+            elif isinstance(event, GoDeeperEvent):
+                status.update("Going deeper into the filesystem...")
                 content = f"Going to directory: `{event.directory}` because of: {event.reason}"
                 panel = Panel(
                     Markdown(content),
@@ -39,10 +46,24 @@ async def run_workflow(task: str):
                 )
                 console.print(panel)
                 status.update("Working on the next move...")
+            elif isinstance(event, AskHumanEvent):
+                status.stop()
+                console.print()
+                answer = console.input(
+                    f"[bold cyan]Human response required[/]\n[bold]Question:[/]\n{event.question}\n[bold]Reason for asking[/]\n{event.reason}\n[bold cyan]Your answer:[/] "
+                )
+                while answer.strip() == "":
+                    console.print("[bold red]You need to provide an answer[/]\n")
+                    answer = console.input(
+                        f"[bold cyan]Human response required[/]\n[bold]Question:[/]\n{event.question}\n[bold]Reason for asking[/]\n{event.reason}\n[bold cyan]Your answer:[/] "
+                    )
+                handler.ctx.send_event(HumanAnswerEvent(response=answer.strip()))
+                console.print()
+                status.start()
+                status.update("Working on your request...")
         result = await handler
         status.update("Gathering the final result...")
         await asyncio.sleep(0.1)
-        status.update("Tool calling...")
         content = result.final_result
         panel = Panel(
             Markdown(content),

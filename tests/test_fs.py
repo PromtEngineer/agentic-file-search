@@ -1,8 +1,13 @@
+import pytest
+import os
+
+from unittest.mock import patch
 from fs_explorer.fs import (
     describe_dir_content,
     read_file,
     grep_file_content,
     glob_paths,
+    parse_file,
 )
 
 
@@ -45,3 +50,26 @@ def test_glob_paths() -> None:
     )
     result = glob_paths("tests/testfiles", "test*")
     assert result == "No matches found"
+
+
+@pytest.mark.skipif(
+    condition=(os.getenv("LLAMA_CLOUD_API_KEY") is None),
+    reason="LLAMA_CLOUD_API_KEY is not available",
+)
+@pytest.mark.asyncio
+async def test_parse_file() -> None:
+    content = await parse_file("data/testfile.txt")
+    assert content.strip() == "This is a test."
+
+
+@pytest.mark.asyncio
+async def test_parse_file_without_api_key() -> None:
+    # file does not exist
+    content = await parse_file("data/test.txt")
+    assert content == "No such file: data/test.txt"
+    # api key not set
+    content = await parse_file("data/testfile.txt")
+    assert (
+        content
+        == "Not possible to parse data/testfile.txt as the necessary credentials (`LLAMA_CLOUD_API_KEY`) are not set in the environment"
+    )

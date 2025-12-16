@@ -1,14 +1,20 @@
 from pydantic import BaseModel, Field
 from typing import TypeAlias, Literal, Any
 
-Tools: TypeAlias = Literal["read", "grep", "glob"]
-ActionType: TypeAlias = Literal["stop", "godeeper", "toolcall"]
+Tools: TypeAlias = Literal["read", "grep", "glob", "check_api_key", "parse_file"]
+ActionType: TypeAlias = Literal["stop", "godeeper", "toolcall", "askhuman"]
 
 
 class StopAction(BaseModel):
     """Action that is used when the end goal has been reached"""
 
     final_result: str = Field(description="Final result of the operation")
+
+
+class AskHumanAction(BaseModel):
+    """Action that is used when clarification from the user is needed on a task or on a file"""
+
+    question: str = Field(description="Clarification question to ask to the user.")
 
 
 class GoDeeperAction(BaseModel):
@@ -40,7 +46,7 @@ class ToolCallAction(BaseModel):
 class Action(BaseModel):
     """Action to take based on the current chat history"""
 
-    action: ToolCallAction | GoDeeperAction | StopAction = Field(
+    action: ToolCallAction | GoDeeperAction | StopAction | AskHumanAction = Field(
         description="Action specification for the next step"
     )
     reason: str = Field(description="Reason for taking this specific action")
@@ -50,5 +56,7 @@ class Action(BaseModel):
             return "toolcall"
         elif isinstance(self.action, GoDeeperAction):
             return "godeeper"
+        elif isinstance(self.action, AskHumanAction):
+            return "askhuman"
         else:
             return "stop"
