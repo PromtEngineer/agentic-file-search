@@ -67,7 +67,7 @@ def check_api_key() -> str:
     )
 
 
-def parse_file(file_path: str) -> str:
+async def parse_file(file_path: str) -> str:
     if not os.path.exists(file_path) or not os.path.isfile(file_path):
         return f"No such file: {file_path}"
     if os.getenv("LLAMA_CLOUD_API_KEY") is None:
@@ -77,8 +77,8 @@ def parse_file(file_path: str) -> str:
         result_type=ResultType.TXT,
         fast_mode=True,
     )
-    result = cast(JobResult, parser.parse(file_path=file_path))
+    result = cast(JobResult, await parser.aparse(file_path=file_path))
     if result.error is None:
-        return result.get_text()
+        return await result.aget_text()
     else:
         return f"There was an error while parsing the file {file_path}: {result.error} (code: {result.error_code})"

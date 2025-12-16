@@ -55,7 +55,7 @@ class FsExplorerAgent:
     async def take_action(self) -> tuple[Action, ActionType] | None:
         response = await self._client.aio.models.generate_content(
             model="fiercefalcon",
-            contents=self._chat_history, # type: ignore
+            contents=self._chat_history,  # type: ignore
             config={
                 "response_mime_type": "application/json",
                 "response_json_schema": Action.model_json_schema(),
@@ -68,15 +68,18 @@ class FsExplorerAgent:
                 action = Action.model_validate_json(response.text)
                 if action.to_action_type() == "toolcall":
                     toolcall = cast(ToolCallAction, action.action)
-                    self.call_tool(
+                    await self.call_tool(
                         tool_name=toolcall.tool_name, tool_input=toolcall.to_fn_args()
                     )
                 return action, action.to_action_type()
         return None
 
-    def call_tool(self, tool_name: Tools, tool_input: dict[str, Any]) -> None:
+    async def call_tool(self, tool_name: Tools, tool_input: dict[str, Any]) -> None:
         try:
-            result = TOOLS[tool_name](**tool_input)
+            if tool_name != "parse_file":
+                result = TOOLS[tool_name](**tool_input)
+            else:
+                result = await TOOLS[tool_name](**tool_input)
         except Exception as e:
             result = f"An error occurred while calling tool {tool_name} with {tool_input}: {e}"
         self._chat_history.append(

@@ -58,6 +58,9 @@ async def run_workflow(task: str):
                         f"[bold cyan]Human response required[/]\n[bold]Question:[/]\n{event.question}\n[bold]Reason for asking[/]\n{event.reason}\n[bold cyan]Your answer:[/] "
                     )
                 handler.ctx.send_event(HumanAnswerEvent(response=answer.strip()))
+                console.print()
+                status.start()
+                status.update("Working on your request...")
         result = await handler
         status.update("Gathering the final result...")
         await asyncio.sleep(0.1)
