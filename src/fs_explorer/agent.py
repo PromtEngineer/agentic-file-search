@@ -41,7 +41,7 @@ class FsExplorerAgent:
                 "GOOGLE_API_KEY not found within the current environment: please export it or provide it to the class constructor."
             )
         self._client = GenAIClient(
-            api_key=api_key, http_options=HttpOptions(api_version="v1beta")
+            api_key=api_key, http_options=HttpOptions(api_version="v1")
         )
         self._chat_history: list[Content] = [
             Content(role="system", parts=[Part.from_text(text=SYSTEM_PROMPT)])
@@ -54,7 +54,7 @@ class FsExplorerAgent:
 
     async def take_action(self) -> tuple[Action, ActionType] | None:
         response = await self._client.aio.models.generate_content(
-            model="fiercefalcon",
+            model="gemini-3-flash",
             contents=self._chat_history,  # type: ignore
             config={
                 "response_mime_type": "application/json",
