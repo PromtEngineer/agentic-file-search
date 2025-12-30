@@ -54,7 +54,7 @@ class FsExplorerAgent:
 
     async def take_action(self) -> tuple[Action, ActionType] | None:
         response = await self._client.aio.models.generate_content(
-            model="gemini-3-flash",
+            model="gemini-3-flash-preview",
             contents=self._chat_history,  # type: ignore
             config={
                 "response_mime_type": "application/json",
