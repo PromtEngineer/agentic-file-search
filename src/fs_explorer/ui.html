@@ -858,12 +858,18 @@
             const query = queryInput.value.trim();
             if (!query || isRunning) return;
 
+            // Close any existing WebSocket connection
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+
             isRunning = true;
             stepCount = 0;
             queryBtn.disabled = true;
 
-            // Reset UI
-            stepsList.innerHTML = '';
+            // Reset UI - clear steps and show empty state
+            stepsList.innerHTML = '<div class="empty-state"><div class="prompt">Processing...</div><div class="hint">Starting exploration</div></div>';
             resultContent.innerHTML = '<div class="loading-text">Processing...</div>';
             statsBar.style.display = 'none';
             progressBar.classList.add('active');
@@ -911,6 +917,11 @@
 
         // Add step
         function addStep(data) {
+            // Clear empty state if this is the first step
+            if (data.step === 1 && stepsList.querySelector('.empty-state')) {
+                stepsList.innerHTML = '';
+            }
+            
             stepCount = data.step;
             stepCountEl.textContent = `${stepCount} ${stepCount === 1 ? 'step' : 'steps'}`;
             
@@ -933,6 +944,11 @@
 
         // Add nav step
         function addNavStep(data) {
+            // Clear empty state if this is the first step
+            if (data.step === 1 && stepsList.querySelector('.empty-state')) {
+                stepsList.innerHTML = '';
+            }
+            
             stepCount = data.step;
             stepCountEl.textContent = `${stepCount} ${stepCount === 1 ? 'step' : 'steps'}`;
 
