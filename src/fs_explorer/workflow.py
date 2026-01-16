@@ -14,9 +14,8 @@ from workflows.events import (
     InputRequiredEvent,
     HumanResponseEvent,
 )
-from workflows.resource import Resource
 from pydantic import BaseModel
-from typing import Annotated, cast, Any
+from typing import cast, Any
 
 from .agent import FsExplorerAgent
 from .models import GoDeeperAction, ToolCallAction, StopAction, AskHumanAction, Action
@@ -35,9 +34,13 @@ def get_agent() -> FsExplorerAgent:
 
 
 def reset_agent() -> None:
-    """Reset the agent instance (useful for testing)."""
+    """Reset the agent's state for a new exploration (preserves instance for stats)."""
     global _AGENT
-    _AGENT = None
+    if _AGENT is not None:
+        _AGENT.reset()
+    else:
+        # Create agent if it doesn't exist
+        _AGENT = FsExplorerAgent()
 
 
 class WorkflowState(BaseModel):
@@ -185,12 +188,12 @@ class FsExplorerWorkflow(Workflow):
         self,
         ev: InputEvent,
         ctx: Context[WorkflowState],
-        agent: Annotated[FsExplorerAgent, Resource(get_agent)],
     ) -> WorkflowEvent:
         """Initialize exploration with the user's task."""
+        agent = get_agent()
         async with ctx.store.edit_state() as state:
             state.initial_task = ev.task
-        
+
         dirdescription = describe_dir_content(".")
         agent.configure_task(
             f"Given that the current directory ('.') looks like this:\n\n"
@@ -198,7 +201,7 @@ class FsExplorerWorkflow(Workflow):
             f"And that the user is giving you this task: '{ev.task}', "
             f"what action should you take first?"
         )
-        
+
         return await _process_agent_action(agent, ctx, update_directory=True)
 
     @step
@@ -206,19 +209,19 @@ class FsExplorerWorkflow(Workflow):
         self,
         ev: GoDeeperEvent,
         ctx: Context[WorkflowState],
-        agent: Annotated[FsExplorerAgent, Resource(get_agent)],
     ) -> WorkflowEvent:
         """Handle navigation into a subdirectory."""
+        agent = get_agent()
         state = await ctx.store.get_state()
         dirdescription = describe_dir_content(state.current_directory)
-        
+
         agent.configure_task(
             f"Given that the current directory ('{state.current_directory}') "
             f"looks like this:\n\n```text\n{dirdescription}\n```\n\n"
             f"And that the user is giving you this task: '{state.initial_task}', "
             f"what action should you take next?"
         )
-        
+
         return await _process_agent_action(agent, ctx, update_directory=True)
 
     @step
@@ -226,17 +229,17 @@ class FsExplorerWorkflow(Workflow):
         self,
         ev: HumanAnswerEvent,
         ctx: Context[WorkflowState],
-        agent: Annotated[FsExplorerAgent, Resource(get_agent)],
     ) -> WorkflowEvent:
         """Process the human's response to a question."""
+        agent = get_agent()
         state = await ctx.store.get_state()
-        
+
         agent.configure_task(
             f"Human response to your question: {ev.response}\n\n"
             f"Based on it, proceed with your exploration based on the "
             f"original task: {state.initial_task}"
         )
-        
+
         return await _process_agent_action(agent, ctx, update_directory=True)
 
     @step
@@ -244,14 +247,14 @@ class FsExplorerWorkflow(Workflow):
         self,
         ev: ToolCallEvent,
         ctx: Context[WorkflowState],
-        agent: Annotated[FsExplorerAgent, Resource(get_agent)],
     ) -> WorkflowEvent:
         """Process the result of a tool call."""
+        agent = get_agent()
         agent.configure_task(
             "Given the result from the tool call you just performed, "
             "what action should you take next?"
         )
-        
+
         return await _process_agent_action(agent, ctx, update_directory=True)
 
 

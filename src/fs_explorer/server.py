@@ -175,12 +175,12 @@ async def websocket_explore(websocket: WebSocket):
         
         # Get final result
         result = await handler
-        
+
         # Get token usage
         agent = get_agent()
         usage = agent.token_usage
         input_cost, output_cost, total_cost = usage._calculate_cost()
-        
+
         await websocket.send_json({
             "type": "complete",
             "data": {

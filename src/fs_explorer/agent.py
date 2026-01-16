@@ -344,12 +344,16 @@ class FsExplorerAgent:
             max_tokens=4096,
         )
 
-        # Track token usage from response
+        # Track token usage from response (always count API call, even if usage is None)
+        prompt_tokens = 0
+        completion_tokens = 0
         if response.usage:
-            self.token_usage.add_api_call(
-                prompt_tokens=response.usage.prompt_tokens or 0,
-                completion_tokens=response.usage.completion_tokens or 0,
-            )
+            prompt_tokens = response.usage.prompt_tokens or 0
+            completion_tokens = response.usage.completion_tokens or 0
+        self.token_usage.add_api_call(
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+        )
 
         if response.choices and response.choices[0].message.content:
             content = response.choices[0].message.content
@@ -389,9 +393,10 @@ class FsExplorerAgent:
                     )
                 return action, action.to_action_type()
             except Exception as e:
-                # If JSON parsing fails, try to extract from the response
+                # If JSON parsing fails, log error (encode safely for Windows console)
+                safe_content = content[:500].encode('ascii', errors='replace').decode('ascii')
                 print(f"Warning: Failed to parse action JSON: {e}")
-                print(f"Response content: {content[:500]}...")
+                print(f"Response content: {safe_content}...")
                 return None
 
         return None
