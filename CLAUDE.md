@@ -52,7 +52,7 @@ uv run uvicorn fs_explorer.server:app --host 127.0.0.1 --port 8000
 The system uses an event-driven workflow with LlamaIndex Workflows:
 
 - **workflow.py**: Event orchestration - handles `InputEvent`, `ToolCallEvent`, `GoDeeperEvent`, `AskHumanEvent`, `ExplorationEndEvent`
-- **agent.py**: Gemini client with structured JSON output, token tracking, and the `SYSTEM_PROMPT` that defines the three-phase exploration strategy
+- **agent.py**: Claude Opus client (via ProxyPal) with structured JSON output, token tracking, and the `SYSTEM_PROMPT` that defines the three-phase exploration strategy
 - **models.py**: Pydantic schemas for agent actions (`ToolCallAction`, `GoDeeperAction`, `StopAction`, `AskHumanAction`)
 - **fs.py**: File operations with Docling for document parsing. Includes in-memory document cache keyed by `path:mtime`
 - **main.py**: CLI entry point using Typer + Rich
@@ -74,9 +74,20 @@ Docling handles PDF, DOCX, PPTX, XLSX, HTML, Markdown → Markdown conversion. S
 
 ## Configuration
 
-Requires `GOOGLE_API_KEY` environment variable (set in `.env` file).
+Requires `PROXYPAL_API_KEY` environment variable (set in `.env` file). Uses Claude Opus via ProxyPal.
 
 ## Test Data
 
 - `data/test_acquisition/` - 10 interconnected legal documents
 - `data/large_acquisition/` - 25 documents with cross-references
+- `data/demo_project/` - 6 IT project documents for DELL Romandie Day 2026 demo
+
+## DELL Romandie Day 2026 Presentation
+
+Materials in `presentation/material/`:
+- `MS_Presentation-DELL Romandie Day 2026_v1.pdf` - Main presentation (needs new slides for the demo)
+- `YT-This is the new RAG-Transcritption.txt` - YouTube transcript from original demo author explaining the agentic approach
+
+Demo query: "What are all the dependencies blocking Phase 2 launch?"
+
+Slide content outline in `presentation/SLIDE_CONTENT.md`
