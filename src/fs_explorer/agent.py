@@ -1,18 +1,18 @@
 """
-FsExplorer Agent for filesystem exploration using Google Gemini.
+FsExplorer Agent for filesystem exploration using ProxyPal/OpenAI-compatible API.
 
-This module contains the agent that interacts with the Gemini AI model
+This module contains the agent that interacts with an LLM (via ProxyPal)
 to make decisions about filesystem exploration actions.
 """
 
 import os
+import json
 from pathlib import Path
 from typing import Callable, Any, cast
 from dataclasses import dataclass
 
 from dotenv import load_dotenv
-from google.genai.types import Content, HttpOptions, Part
-from google.genai import Client as GenAIClient
+from openai import AsyncOpenAI
 
 # Load .env file from project root
 _env_path = Path(__file__).parent.parent.parent / ".env"
@@ -34,37 +34,37 @@ from .fs import (
 # Token Usage Tracking
 # =============================================================================
 
-# Gemini Flash pricing (per million tokens)
-GEMINI_FLASH_INPUT_COST_PER_MILLION = 0.075
-GEMINI_FLASH_OUTPUT_COST_PER_MILLION = 0.30
+# Claude Sonnet pricing (per million tokens) - approximate
+CLAUDE_SONNET_INPUT_COST_PER_MILLION = 3.00
+CLAUDE_SONNET_OUTPUT_COST_PER_MILLION = 15.00
 
 
 @dataclass
 class TokenUsage:
     """
     Track token usage and costs across the session.
-    
+
     Maintains running totals of API calls, token counts, and provides
-    cost estimates based on Gemini Flash pricing.
+    cost estimates based on Claude Sonnet pricing.
     """
-    
+
     prompt_tokens: int = 0
     completion_tokens: int = 0
     total_tokens: int = 0
     api_calls: int = 0
-    
+
     # Track content sizes
     tool_result_chars: int = 0
     documents_parsed: int = 0
     documents_scanned: int = 0
-    
+
     def add_api_call(self, prompt_tokens: int, completion_tokens: int) -> None:
         """Record token usage from an API call."""
         self.prompt_tokens += prompt_tokens
         self.completion_tokens += completion_tokens
         self.total_tokens += prompt_tokens + completion_tokens
         self.api_calls += 1
-    
+
     def add_tool_result(self, result: str, tool_name: str) -> None:
         """Record metrics from a tool execution."""
         self.tool_result_chars += len(result)
@@ -75,17 +75,17 @@ class TokenUsage:
             self.documents_scanned += result.count("│ [")
         elif tool_name == "preview_file":
             self.documents_parsed += 1
-    
+
     def _calculate_cost(self) -> tuple[float, float, float]:
-        """Calculate estimated costs based on Gemini Flash pricing."""
-        input_cost = (self.prompt_tokens / 1_000_000) * GEMINI_FLASH_INPUT_COST_PER_MILLION
-        output_cost = (self.completion_tokens / 1_000_000) * GEMINI_FLASH_OUTPUT_COST_PER_MILLION
+        """Calculate estimated costs based on Claude Sonnet pricing."""
+        input_cost = (self.prompt_tokens / 1_000_000) * CLAUDE_SONNET_INPUT_COST_PER_MILLION
+        output_cost = (self.completion_tokens / 1_000_000) * CLAUDE_SONNET_OUTPUT_COST_PER_MILLION
         return input_cost, output_cost, input_cost + output_cost
-    
+
     def summary(self) -> str:
         """Generate a formatted summary of token usage and costs."""
         input_cost, output_cost, total_cost = self._calculate_cost()
-        
+
         return f"""
 ═══════════════════════════════════════════════════════════════
                       TOKEN USAGE SUMMARY
@@ -99,7 +99,7 @@ class TokenUsage:
   Documents Parsed:    {self.documents_parsed}
   Tool Result Chars:   {self.tool_result_chars:,}
 ───────────────────────────────────────────────────────────────
-  Est. Cost (Gemini Flash):
+  Est. Cost (Claude Sonnet):
     Input:  ${input_cost:.4f}
     Output: ${output_cost:.4f}
     Total:  ${total_cost:.4f}
@@ -181,9 +181,9 @@ When providing your final answer, you MUST include citations for ALL factual cla
 Use inline citations in this format: `[Source: filename, Section/Page]`
 
 Example:
-> The total purchase price is $125,000,000 [Source: 01_master_agreement.pdf, Section 2.1], 
-> consisting of $80M cash [Source: 01_master_agreement.pdf, Section 2.1(a)], 
-> $30M in stock [Source: 10_stock_purchase.pdf, Section 1], and 
+> The total purchase price is $125,000,000 [Source: 01_master_agreement.pdf, Section 2.1],
+> consisting of $80M cash [Source: 01_master_agreement.pdf, Section 2.1(a)],
+> $30M in stock [Source: 10_stock_purchase.pdf, Section 1], and
 > $15M in escrow [Source: 09_escrow_agreement.pdf, Section 2].
 
 ### Citation Rules
@@ -201,7 +201,7 @@ Your final answer should:
 ```
 ## Sources Consulted
 - 01_master_agreement.pdf - Main acquisition terms
-- 10_stock_purchase.pdf - Stock component details  
+- 10_stock_purchase.pdf - Stock component details
 - 09_escrow_agreement.pdf - Escrow terms and release schedule
 ```
 
@@ -218,18 +218,49 @@ User asks: "What is the purchase price?"
    - SKIP: employee_handbook.pdf, hr_policies.pdf (unrelated to pricing)"
 
 2. parse_file("purchase_agreement.pdf")
-   Reason: "Found purchase price of $50M in Section 2.1. Document references 
+   Reason: "Found purchase price of $50M in Section 2.1. Document references
    'Exhibit B for price adjustments' - need to check exhibits.pdf next."
 
 3. parse_file("exhibits.pdf")  [BACKTRACKING]
-   Reason: "Backtracking to exhibits.pdf because purchase_agreement.pdf 
-   referenced it for adjustment details. Found working capital adjustment 
+   Reason: "Backtracking to exhibits.pdf because purchase_agreement.pdf
+   referenced it for adjustment details. Found working capital adjustment
    formula in Exhibit B."
 
 4. STOP with final answer including citations:
-   "The purchase price is $50,000,000 [Source: purchase_agreement.pdf, Section 2.1], 
+   "The purchase price is $50,000,000 [Source: purchase_agreement.pdf, Section 2.1],
    subject to working capital adjustments [Source: exhibits.pdf, Exhibit B]..."
 ```
+
+## Response Format
+
+You MUST respond with valid JSON in this exact format:
+
+For tool calls:
+{
+  "action": {
+    "tool_name": "scan_folder",
+    "tool_input": [{"parameter_name": "directory", "parameter_value": "./path"}]
+  },
+  "reason": "Your reasoning here"
+}
+
+For navigating deeper:
+{
+  "action": {"directory": "./path/to/explore"},
+  "reason": "Your reasoning here"
+}
+
+For asking the user:
+{
+  "action": {"question": "Your question here"},
+  "reason": "Your reasoning here"
+}
+
+For final answer:
+{
+  "action": {"final_result": "Your complete answer with citations"},
+  "reason": "Your reasoning here"
+}
 """
 
 
@@ -239,84 +270,117 @@ User asks: "What is the purchase price?"
 
 class FsExplorerAgent:
     """
-    AI agent for exploring filesystems using Google Gemini.
-    
+    AI agent for exploring filesystems using ProxyPal/OpenAI-compatible API.
+
     The agent maintains a conversation history with the LLM and uses
     structured JSON output to make decisions about which actions to take.
-    
+
     Attributes:
         token_usage: Tracks API call statistics and costs.
     """
-    
-    def __init__(self, api_key: str | None = None) -> None:
+
+    def __init__(self, api_key: str | None = None, base_url: str | None = None, model: str | None = None) -> None:
         """
-        Initialize the agent with Google API credentials.
-        
+        Initialize the agent with ProxyPal/OpenAI credentials.
+
         Args:
-            api_key: Google API key. If not provided, reads from
-                     GOOGLE_API_KEY environment variable.
-        
+            api_key: API key. If not provided, reads from PROXYPAL_API_KEY env var.
+            base_url: Base URL for the API. If not provided, reads from PROXYPAL_BASE_URL env var.
+            model: Model to use. If not provided, reads from PROXYPAL_MODEL env var.
+
         Raises:
-            ValueError: If no API key is available.
+            ValueError: If required configuration is not available.
         """
         if api_key is None:
-            api_key = os.getenv("GOOGLE_API_KEY")
+            api_key = os.getenv("PROXYPAL_API_KEY")
         if api_key is None:
             raise ValueError(
-                "GOOGLE_API_KEY not found within the current environment: "
+                "PROXYPAL_API_KEY not found within the current environment: "
                 "please export it or provide it to the class constructor."
             )
-        
-        self._client = GenAIClient(
+
+        if base_url is None:
+            base_url = os.getenv("PROXYPAL_BASE_URL", "http://localhost:8317/v1")
+
+        if model is None:
+            model = os.getenv("PROXYPAL_MODEL", "claude-sonnet-4-20250514")
+
+        self._client = AsyncOpenAI(
             api_key=api_key,
-            http_options=HttpOptions(api_version="v1beta"),
+            base_url=base_url,
         )
-        self._chat_history: list[Content] = []
+        self._model = model
+        self._chat_history: list[dict[str, str]] = []
+        self._system_prompt = SYSTEM_PROMPT
         self.token_usage = TokenUsage()
 
     def configure_task(self, task: str) -> None:
         """
         Add a task message to the conversation history.
-        
+
         Args:
             task: The task or context to add to the conversation.
         """
-        self._chat_history.append(
-            Content(role="user", parts=[Part.from_text(text=task)])
-        )
+        self._chat_history.append({"role": "user", "content": task})
 
     async def take_action(self) -> tuple[Action, ActionType] | None:
         """
         Request the next action from the AI model.
-        
-        Sends the current conversation history to Gemini and receives
+
+        Sends the current conversation history to the LLM and receives
         a structured JSON response indicating the next action to take.
-        
+
         Returns:
             A tuple of (Action, ActionType) if successful, None otherwise.
         """
-        response = await self._client.aio.models.generate_content(
-            model="gemini-3-flash-preview",
-            contents=self._chat_history,  # type: ignore
-            config={
-                "system_instruction": SYSTEM_PROMPT,
-                "response_mime_type": "application/json",
-                "response_schema": Action,
-            },
+        messages = [
+            {"role": "system", "content": self._system_prompt},
+            *self._chat_history,
+        ]
+
+        response = await self._client.chat.completions.create(
+            model=self._model,
+            messages=messages,  # type: ignore
+            max_tokens=4096,
         )
-        
-        # Track token usage from response metadata
-        if response.usage_metadata:
+
+        # Track token usage from response
+        if response.usage:
             self.token_usage.add_api_call(
-                prompt_tokens=response.usage_metadata.prompt_token_count or 0,
-                completion_tokens=response.usage_metadata.candidates_token_count or 0,
+                prompt_tokens=response.usage.prompt_tokens or 0,
+                completion_tokens=response.usage.completion_tokens or 0,
             )
-        
-        if response.candidates is not None:
-            if response.candidates[0].content is not None:
-                self._chat_history.append(response.candidates[0].content)
-            if response.text is not None:
-                action = Action.model_validate_json(response.text)
+
+        if response.choices and response.choices[0].message.content:
+            content = response.choices[0].message.content
+
+            # Add assistant response to history
+            self._chat_history.append({"role": "assistant", "content": content})
+
+            # Extract JSON from response (handle markdown code blocks and preamble text)
+            json_content = content
+            if "```json" in content:
+                json_content = content.split("```json")[1].split("```")[0].strip()
+            elif "```" in content:
+                json_content = content.split("```")[1].split("```")[0].strip()
+            elif "{" in content:
+                # Handle case where model returns text before JSON
+                start_idx = content.find("{")
+                # Find matching closing brace
+                brace_count = 0
+                end_idx = start_idx
+                for i, char in enumerate(content[start_idx:], start_idx):
+                    if char == "{":
+                        brace_count += 1
+                    elif char == "}":
+                        brace_count -= 1
+                        if brace_count == 0:
+                            end_idx = i + 1
+                            break
+                json_content = content[start_idx:end_idx]
+
+            try:
+                action = Action.model_validate_json(json_content)
                 if action.to_action_type() == "toolcall":
                     toolcall = cast(ToolCallAction, action.action)
                     self.call_tool(
@@ -324,13 +388,18 @@ class FsExplorerAgent:
                         tool_input=toolcall.to_fn_args(),
                     )
                 return action, action.to_action_type()
-        
+            except Exception as e:
+                # If JSON parsing fails, try to extract from the response
+                print(f"Warning: Failed to parse action JSON: {e}")
+                print(f"Response content: {content[:500]}...")
+                return None
+
         return None
 
     def call_tool(self, tool_name: Tools, tool_input: dict[str, Any]) -> None:
         """
         Execute a tool and add the result to the conversation history.
-        
+
         Args:
             tool_name: Name of the tool to execute.
             tool_input: Dictionary of arguments to pass to the tool.
@@ -342,16 +411,14 @@ class FsExplorerAgent:
                 f"An error occurred while calling tool {tool_name} "
                 f"with {tool_input}: {e}"
             )
-        
+
         # Track tool result sizes
         self.token_usage.add_tool_result(result, tool_name)
-        
-        self._chat_history.append(
-            Content(
-                role="user",
-                parts=[Part.from_text(text=f"Tool result for {tool_name}:\n\n{result}")],
-            )
-        )
+
+        self._chat_history.append({
+            "role": "user",
+            "content": f"Tool result for {tool_name}:\n\n{result}"
+        })
 
     def reset(self) -> None:
         """Reset the agent's conversation history and token tracking."""

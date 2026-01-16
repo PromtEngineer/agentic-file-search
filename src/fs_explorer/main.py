@@ -31,14 +31,14 @@ from .workflow import (
 app = Typer()
 
 
-# Tool icons for visual distinction
+# Tool icons for visual distinction (ASCII-safe for Windows compatibility)
 TOOL_ICONS = {
-    "scan_folder": "📂",
-    "preview_file": "👁️",
-    "parse_file": "📖",
-    "read": "📄",
-    "grep": "🔍",
-    "glob": "🔎",
+    "scan_folder": "[SCAN]",
+    "preview_file": "[PREVIEW]",
+    "parse_file": "[PARSE]",
+    "read": "[READ]",
+    "grep": "[GREP]",
+    "glob": "[GLOB]",
 }
 
 # Phase detection based on tool usage
@@ -55,7 +55,7 @@ PHASE_DESCRIPTIONS = {
 def format_tool_panel(event: ToolCallEvent, step_number: int) -> Panel:
     """Create a richly formatted panel for a tool call event."""
     tool_name = event.tool_name
-    icon = TOOL_ICONS.get(tool_name, "🔧")
+    icon = TOOL_ICONS.get(tool_name, "[TOOL]")
     phase_info = PHASE_DESCRIPTIONS.get(tool_name, ("Action", "Tool Call", "yellow"))
     phase_label, phase_desc, color = phase_info
     
@@ -111,7 +111,7 @@ def format_navigation_panel(event: GoDeeperEvent, step_number: int) -> Panel:
 """
     return Panel(
         Markdown(content),
-        title=f"📁 Step {step_number}: Navigate to Directory",
+        title=f"[DIR] Step {step_number}: Navigate to Directory",
         title_align="left",
         border_style="bold magenta",
         padding=(1, 2),
@@ -125,9 +125,9 @@ def print_workflow_header(console: Console, task: str) -> None:
     header.add_column(style="bold cyan", justify="right")
     header.add_column()
     
-    header.add_row("🤖 FsExplorer Agent", "")
-    header.add_row("📋 Task:", task)
-    header.add_row("🕐 Started:", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    header.add_row("FsExplorer Agent", "")
+    header.add_row("Task:", task)
+    header.add_row("Started:", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     
     console.print(Panel(header, border_style="bold blue", title="Starting Exploration", title_align="left"))
     console.print()
@@ -161,7 +161,7 @@ def print_workflow_summary(console: Console, agent, step_count: int) -> None:
     console.print()
     console.print(Panel(
         summary,
-        title="📊 Workflow Summary",
+        title="[STATS] Workflow Summary",
         title_align="left",
         border_style="bold blue",
     ))
@@ -185,13 +185,13 @@ async def run_workflow(task: str) -> None:
     step_number = 0
     handler = workflow.run(start_event=InputEvent(task=task))
     
-    with console.status(status="[bold cyan]🔄 Analyzing task...") as status:
+    with console.status(status="[bold cyan]> Analyzing task...") as status:
         async for event in handler.stream_events():
             if isinstance(event, ToolCallEvent):
                 step_number += 1
                 
                 # Update status based on tool
-                icon = TOOL_ICONS.get(event.tool_name, "🔧")
+                icon = TOOL_ICONS.get(event.tool_name, "[TOOL]")
                 if event.tool_name == "scan_folder":
                     status.update(f"[bold cyan]{icon} Scanning documents in parallel...")
                 elif event.tool_name == "parse_file":
@@ -206,14 +206,14 @@ async def run_workflow(task: str) -> None:
                 console.print(panel)
                 console.print()
                 
-                status.update("[bold cyan]🔄 Processing results...")
+                status.update("[bold cyan]> Processing results...")
                 
             elif isinstance(event, GoDeeperEvent):
                 step_number += 1
                 panel = format_navigation_panel(event, step_number)
                 console.print(panel)
                 console.print()
-                status.update("[bold cyan]🔄 Exploring directory...")
+                status.update("[bold cyan]> Exploring directory...")
                 
             elif isinstance(event, AskHumanEvent):
                 status.stop()
@@ -222,7 +222,7 @@ async def run_workflow(task: str) -> None:
                 # Create a nice prompt panel
                 question_panel = Panel(
                     Markdown(f"**Question:** {event.question}\n\n**Why I'm asking:** {event.reason}"),
-                    title="❓ Human Input Required",
+                    title="[?] Human Input Required",
                     title_align="left",
                     border_style="bold red",
                 )
@@ -236,11 +236,11 @@ async def run_workflow(task: str) -> None:
                 handler.ctx.send_event(HumanAnswerEvent(response=answer.strip()))
                 console.print()
                 status.start()
-                status.update("[bold cyan]🔄 Processing your response...")
+                status.update("[bold cyan]> Processing your response...")
         
         # Get final result
         result = await handler
-        status.update("[bold green]✨ Preparing final answer...")
+        status.update("[bold green]> Preparing final answer...")
         await asyncio.sleep(0.1)
         status.stop()
     
@@ -249,7 +249,7 @@ async def run_workflow(task: str) -> None:
     if result.final_result:
         final_panel = Panel(
             Markdown(result.final_result),
-            title="✅ Final Answer",
+            title="[OK] Final Answer",
             title_align="left",
             border_style="bold green",
             padding=(1, 2),
@@ -258,7 +258,7 @@ async def run_workflow(task: str) -> None:
     elif result.error:
         error_panel = Panel(
             Text(result.error, style="bold red"),
-            title="❌ Error",
+            title="[ERROR]",
             title_align="left",
             border_style="bold red",
         )
