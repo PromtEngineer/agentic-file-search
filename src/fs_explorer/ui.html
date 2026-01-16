@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
             --bg: #f4f1eb;
@@ -272,6 +273,97 @@
         .step.preview { border-left-color: #8250df; }
         .step.search { border-left-color: var(--accent); }
         .step.navigate { border-left-color: #bf8700; }
+        .step.grep { border-left-color: #e85d04; }
+        .step.read { border-left-color: #7209b7; }
+        .step.glob { border-left-color: #3a86ff; }
+
+        /* Decision Block - shows categorization between scan and parse */
+        .decision-block {
+            background: linear-gradient(135deg, #f8f9fa 0%, #fff8e1 100%);
+            border: 2px dashed var(--accent);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 8px 0;
+            animation: appear 0.3s ease;
+        }
+
+        .decision-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .decision-header .icon {
+            font-size: 18px;
+        }
+
+        .decision-header .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .decision-content {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .decision-content .category {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin: 6px 0;
+            padding: 4px 0;
+        }
+
+        .decision-content .category-files {
+            flex: 1;
+        }
+
+        .decision-content .file-item {
+            display: inline-block;
+            background: var(--bg);
+            padding: 2px 8px;
+            margin: 2px 4px 2px 0;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: var(--mono);
+        }
+
+        /* Retrieval Flag Badges */
+        .flag-relevant {
+            background: #d4edda;
+            color: #155724;
+            padding: 1px 5px;
+            font-size: 9px;
+            font-weight: 600;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .flag-maybe {
+            background: #fff3cd;
+            color: #856404;
+            padding: 1px 5px;
+            font-size: 9px;
+            font-weight: 600;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .flag-skip {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1px 5px;
+            font-size: 9px;
+            font-weight: 600;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
         .step-header {
             display: flex;
@@ -639,6 +731,220 @@
             margin-top: 4px;
         }
 
+        /* Phase Stepper */
+        .phase-stepper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+        }
+
+        .phase-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 24px;
+            min-width: 140px;
+            border: 2px solid var(--border);
+            background: var(--bg);
+            transition: all 0.3s ease;
+        }
+
+        .phase-step.pending {
+            border-color: var(--border);
+            color: var(--ink-muted);
+        }
+
+        .phase-step.active {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .phase-step.active .phase-number {
+            background: var(--accent);
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .phase-step.done {
+            border-color: var(--success);
+            background: #e8f5e9;
+        }
+
+        .phase-step.done .phase-number {
+            background: var(--success);
+            color: white;
+        }
+
+        .phase-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--border);
+            color: var(--ink-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .phase-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .phase-arrow {
+            font-size: 20px;
+            color: var(--border);
+            margin: 0 8px;
+        }
+
+        .phase-arrow.done {
+            color: var(--success);
+        }
+
+        /* Backtrack Badge */
+        .backtrack-badge {
+            background: var(--accent);
+            color: white;
+            padding: 2px 8px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 2px;
+            margin-left: 8px;
+            animation: appear 0.2s ease;
+        }
+
+        /* Tool Icons */
+        .tool-icon {
+            margin-right: 6px;
+            font-size: 14px;
+        }
+
+        /* Markdown Styles - Ultra Compact */
+        .markdown-content {
+            line-height: 1.4;
+        }
+
+        .markdown-content h1 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 16px;
+            font-weight: 400;
+            margin: 8px 0 2px 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 2px;
+        }
+
+        .markdown-content h2 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 15px;
+            font-weight: 400;
+            margin: 6px 0 2px 0;
+        }
+
+        .markdown-content h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 5px 0 1px 0;
+        }
+
+        .markdown-content h4 {
+            font-size: 13px;
+            font-weight: 600;
+            margin: 4px 0 1px 0;
+            color: var(--ink-light);
+        }
+
+        .markdown-content p {
+            margin: 2px 0;
+        }
+
+        .markdown-content ul, .markdown-content ol {
+            margin: 2px 0;
+            padding-left: 18px;
+        }
+
+        .markdown-content li {
+            margin: 1px 0;
+        }
+
+        .markdown-content li > p {
+            margin: 0;
+            display: inline;
+        }
+
+        .markdown-content code {
+            background: var(--bg-alt);
+            padding: 1px 4px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            border-radius: 2px;
+        }
+
+        .markdown-content pre {
+            background: var(--bg-alt);
+            padding: 8px 12px;
+            overflow-x: auto;
+            margin: 6px 0;
+            border-left: 3px solid var(--accent);
+        }
+
+        .markdown-content pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .markdown-content blockquote {
+            border-left: 3px solid var(--accent);
+            padding-left: 12px;
+            margin: 6px 0;
+            color: var(--ink-light);
+            font-style: italic;
+        }
+
+        .markdown-content strong {
+            font-weight: 600;
+        }
+
+        .markdown-content em {
+            font-style: italic;
+        }
+
+        /* Citation Badge */
+        .citation-badge {
+            display: inline;
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 1px 6px;
+            font-size: 10px;
+            border-radius: 8px;
+            margin: 0 2px;
+            font-weight: 500;
+            border: 1px solid var(--accent);
+            white-space: nowrap;
+        }
+
+        .citation-badge::before {
+            content: '📎';
+            margin-right: 2px;
+            font-size: 9px;
+        }
+
         /* Scrollbar */
         .scrollable {
             max-height: 500px;
@@ -717,6 +1023,24 @@
         <!-- Progress -->
         <div class="progress-bar" id="progressBar">
             <div class="progress-fill"></div>
+        </div>
+
+        <!-- Phase Stepper -->
+        <div class="phase-stepper" id="phaseStepper" style="display: none;">
+            <div class="phase-step pending" id="phase1">
+                <div class="phase-number">1</div>
+                <div class="phase-label">Scan</div>
+            </div>
+            <div class="phase-arrow" id="arrow1">→</div>
+            <div class="phase-step pending" id="phase2">
+                <div class="phase-number">2</div>
+                <div class="phase-label">Deep Dive</div>
+            </div>
+            <div class="phase-arrow" id="arrow2">→</div>
+            <div class="phase-step pending" id="phase3">
+                <div class="phase-number">3</div>
+                <div class="phase-label">Backtrack</div>
+            </div>
         </div>
 
         <!-- Main Grid -->
@@ -820,16 +1144,34 @@
         let isRunning = false;
         let currentFolder = '.';
         let browsingPath = '.';
+        let currentPhase = 0;
 
         // Tool styles
         const toolStyles = {
             scan_folder: 'scan',
             preview_file: 'preview',
             parse_file: 'parse',
-            read: 'preview',
-            grep: 'search',
-            glob: 'search',
+            read: 'read',
+            grep: 'grep',
+            glob: 'glob',
         };
+
+        // Tool icons
+        const toolIcons = {
+            scan_folder: '📂',
+            parse_file: '📄',
+            preview_file: '👁️',
+            read: '📖',
+            grep: '🔍',
+            glob: '🔎',
+            navigate: '📁',
+        };
+
+        // Backtrack detection regex
+        // Backtrack detection - detect when agent is following cross-references to previously skipped docs
+        // Should match: "backtrack", "going back", "need to check [doc] that I skipped"
+        // Should NOT match: just "references" alone (too common)
+        const backtrackPattern = /backtrack|going back|need to (check|parse|read).*([A-Za-z_]+\.(pdf|md)).*skip|previously skipped|revisit/i;
 
         // Elements
         const queryInput = document.getElementById('queryInput');
@@ -847,6 +1189,12 @@
         const folderModalPath = document.getElementById('folderModalPath');
         const folderUpBtn = document.getElementById('folderUpBtn');
         const currentPathEl = document.getElementById('currentPath');
+        const phaseStepper = document.getElementById('phaseStepper');
+        const phase1 = document.getElementById('phase1');
+        const phase2 = document.getElementById('phase2');
+        const phase3 = document.getElementById('phase3');
+        const arrow1 = document.getElementById('arrow1');
+        const arrow2 = document.getElementById('arrow2');
 
         // Enter key
         queryInput.addEventListener('keypress', (e) => {
@@ -874,7 +1222,12 @@
             statsBar.style.display = 'none';
             progressBar.classList.add('active');
             stepCountEl.textContent = '—';
-            
+
+            // Reset and show phase stepper
+            currentPhase = 0;
+            phaseStepper.style.display = 'flex';
+            resetPhases();
+
             updateStatus('Connecting', 'active');
 
             // WebSocket
@@ -921,21 +1274,28 @@
             if (data.step === 1 && stepsList.querySelector('.empty-state')) {
                 stepsList.innerHTML = '';
             }
-            
+
             stepCount = data.step;
             stepCountEl.textContent = `${stepCount} ${stepCount === 1 ? 'step' : 'steps'}`;
-            
+
             const style = toolStyles[data.tool_name] || 'preview';
             const target = data.tool_input.directory || data.tool_input.file_path || '';
+            const icon = toolIcons[data.tool_name] || '📄';
+            const isBacktracking = backtrackPattern.test(data.reason);
+
+            // Update phase
+            updatePhase(data.tool_name, data.reason);
+
+            const backtrackBadge = isBacktracking ? '<span class="backtrack-badge">Backtrack</span>' : '';
 
             const html = `
                 <div class="step ${style}">
                     <div class="step-header">
                         <span class="step-id">#${data.step}</span>
-                        <span class="step-tool">${data.tool_name}</span>
+                        <span class="step-tool"><span class="tool-icon">${icon}</span>${data.tool_name}${backtrackBadge}</span>
                     </div>
                     ${target ? `<div class="step-target">${esc(target)}</div>` : ''}
-                    <div class="step-reason">${esc(data.reason)}</div>
+                    <div class="step-reason">${highlightFlags(data.reason)}</div>
                 </div>
             `;
             stepsList.insertAdjacentHTML('beforeend', html);
@@ -948,18 +1308,22 @@
             if (data.step === 1 && stepsList.querySelector('.empty-state')) {
                 stepsList.innerHTML = '';
             }
-            
+
             stepCount = data.step;
             stepCountEl.textContent = `${stepCount} ${stepCount === 1 ? 'step' : 'steps'}`;
+
+            const icon = toolIcons['navigate'] || '📁';
+            const isBacktracking = backtrackPattern.test(data.reason);
+            const backtrackBadge = isBacktracking ? '<span class="backtrack-badge">Backtrack</span>' : '';
 
             const html = `
                 <div class="step navigate">
                     <div class="step-header">
                         <span class="step-id">#${data.step}</span>
-                        <span class="step-tool">navigate</span>
+                        <span class="step-tool"><span class="tool-icon">${icon}</span>navigate${backtrackBadge}</span>
                     </div>
                     <div class="step-target">${esc(data.directory)}</div>
-                    <div class="step-reason">${esc(data.reason)}</div>
+                    <div class="step-reason">${highlightFlags(data.reason)}</div>
                 </div>
             `;
             stepsList.insertAdjacentHTML('beforeend', html);
@@ -991,9 +1355,16 @@
             }
 
             let text = data.final_result || 'No result';
-            text = text.replace(/\[Source:[^\]]+\]/g, m => `<span class="citation">${esc(m)}</span>`);
-            
-            resultContent.innerHTML = `<div class="result-text">${text}</div>`;
+
+            // Render markdown using marked.js
+            let html = marked.parse(text);
+
+            // Style citations as badges [Source: filename, Section X]
+            html = html.replace(/\[Source:\s*([^\]]+)\]/g, (match, content) => {
+                return `<span class="citation-badge">${esc(content)}</span>`;
+            });
+
+            resultContent.innerHTML = `<div class="result-text markdown-content">${html}</div>`;
 
             // Stats
             const s = data.stats;
@@ -1037,11 +1408,197 @@
             return d.innerHTML;
         }
 
+        // Highlight retrieval flags in reason text
+        function highlightFlags(text) {
+            let escaped = esc(text);
+            // Handle markdown ** and plain formats
+            // RELEVANT with filename
+            escaped = escaped.replace(/\*?\*?RELEVANT\*?\*?:?\s*-?\s*([^\s,\-\*]+)/gi, '<span class="flag-relevant">RELEVANT</span> <strong>$1</strong>');
+            // MAYBE with filename
+            escaped = escaped.replace(/\*?\*?MAYBE\*?\*?:?\s*-?\s*([^\s,\-\*]+)/gi, '<span class="flag-maybe">MAYBE</span> <strong>$1</strong>');
+            // SKIP with filename
+            escaped = escaped.replace(/\*?\*?SKIP\*?\*?:?\s*-?\s*([^\s,\-\*]+)/gi, '<span class="flag-skip">SKIP</span> <strong>$1</strong>');
+            return escaped;
+        }
+
+        // Track if decision block has been shown for this session
+        let decisionBlockShown = false;
+
+        // Detect if reason contains categorization from scan results
+        function hasCategorization(reason) {
+            // Look for categorization patterns
+            const patterns = [
+                /categoriz(ing|e|ation)/i,
+                /based on the (parallel )?scan/i,
+                /RELEVANT.*MAYBE.*SKIP/i,
+                /RELEVANT:.*SKIP:/i
+            ];
+            return patterns.some(p => p.test(reason));
+        }
+
+        // Parse categorization from reason text and return structured data
+        function parseCategorization(reason) {
+            const categories = {
+                relevant: [],
+                maybe: [],
+                skip: []
+            };
+
+            // File extension pattern
+            const filePattern = /[\w\-\_\.]+\.(pdf|md|docx?|txt|xlsx?|pptx?|html)/gi;
+
+            // Split by category markers and extract files from each section
+            // Use negative lookahead to properly split sections
+            const relevantMatch = reason.match(/RELEVANT[:\s\-\*]*([\s\S]*?)(?=\s*-?\s*\*?\*?MAYBE|\s*-?\s*\*?\*?SKIP|$)/i);
+            if (relevantMatch) {
+                const files = relevantMatch[1].match(filePattern);
+                if (files) categories.relevant = [...new Set(files)]; // dedupe
+            }
+
+            const maybeMatch = reason.match(/MAYBE[:\s\-\*]*([\s\S]*?)(?=\s*-?\s*\*?\*?SKIP|\s*-?\s*\*?\*?RELEVANT|$)/i);
+            if (maybeMatch) {
+                const files = maybeMatch[1].match(filePattern);
+                if (files) categories.maybe = [...new Set(files)];
+            }
+
+            const skipMatch = reason.match(/SKIP[:\s\-\*]*([\s\S]*?)(?=\s*-?\s*\*?\*?RELEVANT|\s*-?\s*\*?\*?MAYBE|$)/i);
+            if (skipMatch) {
+                const files = skipMatch[1].match(filePattern);
+                if (files) categories.skip = [...new Set(files)];
+            }
+
+            // Remove duplicates: files in RELEVANT take priority over MAYBE/SKIP
+            const relevantSet = new Set(categories.relevant);
+            const maybeSet = new Set(categories.maybe);
+            categories.maybe = categories.maybe.filter(f => !relevantSet.has(f));
+            categories.skip = categories.skip.filter(f => !relevantSet.has(f) && !maybeSet.has(f));
+
+            return categories;
+        }
+
+        // Create decision block HTML
+        function createDecisionBlock(categories) {
+            const renderFiles = (files) => files.map(f => `<span class="file-item">${esc(f)}</span>`).join('');
+
+            return `
+                <div class="decision-block">
+                    <div class="decision-header">
+                        <span class="icon">🧠</span>
+                        <span class="label">Agent Decision: Document Categorization</span>
+                    </div>
+                    <div class="decision-content">
+                        <div class="category">
+                            <span class="flag-relevant">RELEVANT</span>
+                            <div class="category-files">${categories.relevant.length ? renderFiles(categories.relevant) : '<em>none</em>'}</div>
+                        </div>
+                        <div class="category">
+                            <span class="flag-maybe">MAYBE</span>
+                            <div class="category-files">${categories.maybe.length ? renderFiles(categories.maybe) : '<em>none</em>'}</div>
+                        </div>
+                        <div class="category">
+                            <span class="flag-skip">SKIP</span>
+                            <div class="category-files">${categories.skip.length ? renderFiles(categories.skip) : '<em>none</em>'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Extract the action-specific reason (after categorization)
+        function getActionReason(reason, target) {
+            // Try to find the action-specific part
+            const actionPatterns = [
+                /Starting with\s+[\w\-\.]+/i,
+                /(?:Now |First |Going to )?(pars|read|check|examin|analyz)/i,
+                /(?:it |this |the document )directly shows/i,
+                /as it (?:directly )?(?:shows|contains|has)/i
+            ];
+
+            for (const pattern of actionPatterns) {
+                const match = reason.match(pattern);
+                if (match && match.index !== undefined) {
+                    const actionPart = reason.substring(match.index);
+                    if (actionPart.length > 20) {
+                        return actionPart;
+                    }
+                }
+            }
+
+            // Fallback: just show the target file
+            if (target) {
+                return `Parsing ${target} for detailed content extraction.`;
+            }
+            return reason;
+        }
+
         // Format number
         function formatNum(n) {
             if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
             if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
             return n;
+        }
+
+        // ========== Phase Tracking ==========
+
+        // Reset all phases to pending
+        function resetPhases() {
+            phase1.className = 'phase-step pending';
+            phase2.className = 'phase-step pending';
+            phase3.className = 'phase-step pending';
+            arrow1.className = 'phase-arrow';
+            arrow2.className = 'phase-arrow';
+            phase1.querySelector('.phase-number').textContent = '1';
+            phase2.querySelector('.phase-number').textContent = '2';
+            phase3.querySelector('.phase-number').textContent = '3';
+        }
+
+        // Update phase based on tool and reason
+        function updatePhase(toolName, reason) {
+            const isBacktracking = backtrackPattern.test(reason);
+
+            // Determine target phase
+            let targetPhase;
+            if (isBacktracking) {
+                targetPhase = 3;
+            } else if (toolName === 'scan_folder') {
+                targetPhase = 1;
+            } else if (toolName === 'parse_file' || toolName === 'preview_file' || toolName === 'read') {
+                targetPhase = 2;
+            } else {
+                // grep, glob, navigate stay in current phase or default to 2
+                targetPhase = currentPhase || 2;
+            }
+
+            // Only advance phase, never go back (unless backtracking)
+            if (targetPhase > currentPhase || (isBacktracking && targetPhase === 3)) {
+                // Mark previous phases as done
+                if (currentPhase >= 1) {
+                    phase1.className = 'phase-step done';
+                    phase1.querySelector('.phase-number').textContent = '✓';
+                    arrow1.className = 'phase-arrow done';
+                }
+                if (currentPhase >= 2 || targetPhase === 3) {
+                    phase2.className = 'phase-step done';
+                    phase2.querySelector('.phase-number').textContent = '✓';
+                    arrow2.className = 'phase-arrow done';
+                }
+
+                currentPhase = targetPhase;
+            }
+
+            // Set current phase as active
+            const phases = [null, phase1, phase2, phase3];
+            if (phases[currentPhase]) {
+                // First ensure previous phases are done
+                for (let i = 1; i < currentPhase; i++) {
+                    if (phases[i].className !== 'phase-step done') {
+                        phases[i].className = 'phase-step done';
+                        phases[i].querySelector('.phase-number').textContent = '✓';
+                    }
+                }
+                // Then set current as active
+                phases[currentPhase].className = 'phase-step active';
+            }
         }
 
         // ========== Folder Picker ==========
