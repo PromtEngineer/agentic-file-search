@@ -430,8 +430,10 @@
         .reason-list li {
             position: relative;
             padding-left: 16px;
-            margin: 3px 0;
-            line-height: 1.4;
+            margin: 4px 0;
+            padding-top: 2px;
+            padding-bottom: 2px;
+            line-height: 1.5;
         }
 
         .reason-list li::before {
@@ -440,6 +442,18 @@
             left: 0;
             color: var(--accent);
             font-weight: bold;
+        }
+
+        /* Bold text in step reasons - for markdown **bold** rendered as <strong> */
+        .step-reason strong {
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        /* Emphasis in step reasons */
+        .step-reason em {
+            font-style: italic;
+            color: var(--ink-light);
         }
 
         .reason-refs {
@@ -1560,9 +1574,26 @@
             return d.innerHTML;
         }
 
+        // Convert markdown bold/italic to HTML (manual parsing for control)
+        function processMarkdown(text) {
+            // Bold: **text** → <strong>text</strong>
+            text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            // Italic: *text* (single asterisk, not part of **) → <em>text</em>
+            text = text.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+            return text;
+        }
+
         // Highlight retrieval flags in reason text
         function highlightFlags(text) {
-            let escaped = esc(text);
+            // 1. Process markdown first (before escaping) to convert **bold** and *italic*
+            let html = processMarkdown(text);
+
+            // 2. Escape HTML but preserve our generated tags (<strong>, <em>)
+            html = html.replace(/(<[^>]+>)|([^<]+)/g, (match, tag, content) => {
+                return tag || esc(content);
+            });
+
+            let escaped = html;
             // Handle markdown ** and plain formats
             // RELEVANT with filename
             escaped = escaped.replace(/\*?\*?RELEVANT\*?\*?:?\s*-?\s*([^\s,\-\*]+)/gi, '<span class="flag-relevant">RELEVANT</span> <strong>$1</strong>');
@@ -1625,27 +1656,36 @@
 
             // Convert numbered lists to bullet points
             // Match patterns like "1. item 2. item" or "1) item 2) item"
-            const listPattern = /(\d+[\.\)]\s*)([^0-9]+?)(?=\s*\d+[\.\)]|$)/g;
-            const hasNumberedList = (mainContent.match(/\d+[\.\)]\s+\w/g) || []).length >= 2;
+            // Also handles items with HTML tags (from markdown processing)
+            const hasNumberedList = (mainContent.match(/\d+[\.\)]\s+/g) || []).length >= 2;
 
             if (hasNumberedList) {
                 const items = [];
-                let lastIndex = 0;
                 let beforeList = '';
-                let match;
 
-                // Find the start of the list (first number)
-                const firstNumMatch = mainContent.match(/\d+[\.\)]\s+/);
+                // Find the start of the list (first number at word boundary)
+                const firstNumMatch = mainContent.match(/(?:^|\s)(\d+[\.\)]\s+)/);
                 if (firstNumMatch && firstNumMatch.index !== undefined) {
-                    beforeList = mainContent.substring(0, firstNumMatch.index);
-                    const listPart = mainContent.substring(firstNumMatch.index);
+                    const listStartIndex = firstNumMatch.index + (firstNumMatch[0].startsWith(' ') ? 1 : 0);
+                    beforeList = mainContent.substring(0, listStartIndex);
+                    const listPart = mainContent.substring(listStartIndex);
 
-                    // Extract list items
-                    const itemPattern = /\d+[\.\)]\s*([^0-9]+?)(?=\s*\d+[\.\)]|$)/g;
-                    let itemMatch;
-                    while ((itemMatch = itemPattern.exec(listPart)) !== null) {
-                        const itemText = itemMatch[1].trim().replace(/\s+/g, ' ');
-                        if (itemText) items.push(itemText);
+                    // Split by number prefixes, capturing content between them
+                    // Use a pattern that handles HTML tags in item content
+                    const splitPattern = /(\d+[\.\)])\s+/g;
+                    const parts = listPart.split(splitPattern).filter(p => p && p.trim());
+
+                    // Parts alternate: [content, number, content, number, content...]
+                    // First part might be a number if list starts immediately
+                    for (let i = 0; i < parts.length; i++) {
+                        const part = parts[i].trim();
+                        // Skip if this is just a number prefix (e.g., "1." or "2)")
+                        if (/^\d+[\.\)]$/.test(part)) continue;
+                        // Clean up the item text
+                        const itemText = part.replace(/\s+/g, ' ').trim();
+                        if (itemText && itemText.length > 2) {
+                            items.push(itemText);
+                        }
                     }
                 }
 
@@ -1657,8 +1697,46 @@
                 } else {
                     mainContent = highlightDatesAndNumbers(mainContent);
                 }
-            } else {
-                mainContent = highlightDatesAndNumbers(mainContent);
+            }
+            // Also convert dash-based inline lists: "text: - item - item - item"
+            // But NOT for categorization text (contains RELEVANT/MAYBE/SKIP which use dashes differently)
+            else {
+                const isCategorization = /\b(RELEVANT|MAYBE|SKIP)\b/i.test(mainContent);
+                const hasDashList = !isCategorization && (mainContent.match(/\s-\s+[A-Z]/g) || []).length >= 2;
+
+                if (hasDashList) {
+                    const items = [];
+                    let beforeList = '';
+
+                    // Find where the dash list starts (colon followed by dash, or start of dash sequence)
+                    const dashListMatch = mainContent.match(/(:?\s*)-\s+[A-Z]/);
+                    if (dashListMatch && dashListMatch.index !== undefined) {
+                        const colonPart = dashListMatch[1] || '';
+                        beforeList = mainContent.substring(0, dashListMatch.index + colonPart.length);
+                        const listPart = mainContent.substring(dashListMatch.index + colonPart.length);
+
+                        // Split by " - " pattern (dash with spaces, followed by capital letter start)
+                        const dashItems = listPart.split(/\s+-\s+/).filter(p => p && p.trim());
+
+                        for (const item of dashItems) {
+                            const itemText = item.trim().replace(/\s+/g, ' ');
+                            if (itemText && itemText.length > 2) {
+                                items.push(itemText);
+                            }
+                        }
+                    }
+
+                    if (items.length >= 2) {
+                        const listHtml = '<ul class="reason-list">' +
+                            items.map(item => `<li>${highlightDatesAndNumbers(item)}</li>`).join('') +
+                            '</ul>';
+                        mainContent = beforeList + listHtml;
+                    } else {
+                        mainContent = highlightDatesAndNumbers(mainContent);
+                    }
+                } else {
+                    mainContent = highlightDatesAndNumbers(mainContent);
+                }
             }
 
             // Build final HTML
