@@ -166,6 +166,10 @@ When you encounter a folder with documents:
 2. Use `preview_file` or `parse_file` to read the referenced document
 3. Continue this until all relevant cross-references are resolved
 
+**If you decide NOT to backtrack** despite finding a cross-reference:
+- Explain in your **reason**: "Found reference to [document] but sufficient information already gathered"
+- This helps the user understand your decision-making process
+
 ## Providing Detailed Reasoning
 
 Your `reason` field is displayed to the user, so make it informative:

@@ -364,6 +364,19 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+        .flag-crossref {
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 1px 5px;
+            font-size: 9px;
+            font-weight: 600;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .flag-crossref::before {
+            content: '🔗 ';
+        }
 
         .step-header {
             display: flex;
@@ -399,8 +412,89 @@
         .step-reason {
             font-size: 12px;
             color: var(--ink-muted);
-            font-style: italic;
-            line-height: 1.5;
+            font-style: normal;
+            line-height: 1.6;
+        }
+
+        /* Parsed Reason Text Styles */
+        .reason-findings {
+            margin-bottom: 8px;
+        }
+
+        .reason-list {
+            margin: 6px 0 6px 4px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .reason-list li {
+            position: relative;
+            padding-left: 16px;
+            margin: 3px 0;
+            line-height: 1.4;
+        }
+
+        .reason-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .reason-refs {
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px dashed var(--border);
+            font-size: 11px;
+        }
+
+        .reason-refs-label {
+            color: var(--ink-muted);
+            margin-right: 6px;
+        }
+
+        .reason-next {
+            margin-top: 8px;
+            padding: 6px 10px;
+            background: var(--bg);
+            border-left: 2px solid var(--accent);
+            font-size: 11px;
+        }
+
+        .reason-next::before {
+            content: '→ Next: ';
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .badge-date {
+            background: #e8f4f8;
+            color: #0c5460;
+            padding: 1px 6px;
+            font-size: 10px;
+            border-radius: 3px;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .badge-number {
+            background: #fff3cd;
+            color: #856404;
+            padding: 1px 5px;
+            font-size: 10px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .badge-key {
+            background: var(--bg);
+            color: var(--ink);
+            padding: 1px 5px;
+            font-size: 10px;
+            border-radius: 3px;
+            font-weight: 500;
+            border: 1px solid var(--border);
         }
 
         /* Empty State */
@@ -1146,6 +1240,7 @@
         let browsingPath = '.';
         let currentPhase = 0;
         let skippedFiles = new Set();  // Track files marked as SKIP for backtrack detection
+        let referencedSkippedFiles = new Set();  // Track when skipped files are mentioned (cross-reference discovery)
 
         // Tool styles
         const toolStyles = {
@@ -1197,6 +1292,21 @@
             // Extract just the filename from the path
             const fileName = filePath.split('/').pop().split('\\').pop().toLowerCase();
             return skippedFiles.has(fileName);
+        }
+
+        // Find mentions of skipped files in reason text (cross-reference discovery)
+        function findCrossReferences(reason) {
+            const found = [];
+            skippedFiles.forEach(skippedFile => {
+                // Match the base name (without extension) in the reason
+                const baseName = skippedFile.replace(/\.(pdf|md|docx?)$/i, '');
+                const pattern = new RegExp(baseName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+                if (pattern.test(reason)) {
+                    found.push(skippedFile);
+                    referencedSkippedFiles.add(skippedFile);
+                }
+            });
+            return found;
         }
 
         // Elements
@@ -1252,6 +1362,7 @@
             // Reset and show phase stepper
             currentPhase = 0;
             skippedFiles.clear();  // Reset tracked skipped files
+            referencedSkippedFiles.clear();  // Reset cross-reference tracking
             phaseStepper.style.display = 'flex';
             resetPhases();
 
@@ -1331,7 +1442,7 @@
                         <span class="step-tool"><span class="tool-icon">${icon}</span>${data.tool_name}${backtrackBadge}</span>
                     </div>
                     ${target ? `<div class="step-target">${esc(target)}</div>` : ''}
-                    <div class="step-reason">${highlightFlags(data.reason)}</div>
+                    <div class="step-reason">${formatReasonText(data.reason)}</div>
                 </div>
             `;
             stepsList.insertAdjacentHTML('beforeend', html);
@@ -1364,7 +1475,7 @@
                         <span class="step-tool"><span class="tool-icon">${icon}</span>navigate${backtrackBadge}</span>
                     </div>
                     <div class="step-target">${esc(data.directory)}</div>
-                    <div class="step-reason">${highlightFlags(data.reason)}</div>
+                    <div class="step-reason">${formatReasonText(data.reason)}</div>
                 </div>
             `;
             stepsList.insertAdjacentHTML('beforeend', html);
@@ -1459,7 +1570,148 @@
             escaped = escaped.replace(/\*?\*?MAYBE\*?\*?:?\s*-?\s*([^\s,\-\*]+)/gi, '<span class="flag-maybe">MAYBE</span> <strong>$1</strong>');
             // SKIP with filename
             escaped = escaped.replace(/\*?\*?SKIP\*?\*?:?\s*-?\s*([^\s,\-\*]+)/gi, '<span class="flag-skip">SKIP</span> <strong>$1</strong>');
+
+            // Highlight cross-references to skipped files (shows when agent mentions a skipped file)
+            // Only highlight if the file name appears OUTSIDE of existing spans (not after SKIP badge)
+            skippedFiles.forEach(skippedFile => {
+                const baseName = skippedFile.replace(/\.(pdf|md|docx?)$/i, '');
+                const escapedBase = baseName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                // Match the filename, but NOT when preceded by </strong> (which follows SKIP badge)
+                // Use split/join approach to avoid lookbehind issues
+                const parts = escaped.split(/(<[^>]+>)/); // Split by HTML tags
+                escaped = parts.map((part, i) => {
+                    // Only process text nodes (odd indices are tags)
+                    if (i % 2 === 0 && part) {
+                        const pattern = new RegExp(`\\b(${escapedBase}(?:\\.(?:pdf|md|docx?))?)\\b`, 'gi');
+                        return part.replace(pattern, '<span class="flag-crossref">$1</span>');
+                    }
+                    return part;
+                }).join('');
+            });
+
             return escaped;
+        }
+
+        // Format reason text with visual structure
+        function formatReasonText(text) {
+            // First apply flag highlighting (RELEVANT, MAYBE, SKIP, cross-refs)
+            let html = highlightFlags(text);
+
+            // Patterns for splitting content
+            const nextActionPatterns = [
+                /\.\s*(Need to (?:check|look at|examine|parse|read|review))/gi,
+                /\.\s*(Will (?:now |next )?(?:check|look at|examine|parse|read|review))/gi,
+                /\.\s*(Going to (?:check|look at|examine|parse|read))/gi,
+                /\.\s*(Next,? I(?:'ll| will))/gi,
+                /\.\s*(I need to (?:check|look at|examine|parse|read))/gi,
+                /\.\s*(Now (?:checking|looking|examining|parsing|reading))/gi,
+            ];
+
+            // Extract "next action" part
+            let mainContent = html;
+            let nextAction = '';
+
+            for (const pattern of nextActionPatterns) {
+                const match = html.match(pattern);
+                if (match && match.index !== undefined) {
+                    const splitPoint = match.index + 1; // Include the period
+                    mainContent = html.substring(0, splitPoint);
+                    nextAction = html.substring(splitPoint).trim();
+                    // Remove leading pattern words for cleaner display
+                    nextAction = nextAction.replace(/^(Need to |Will (now |next )?|Going to |Next,? I('ll| will) |I need to |Now )/i, '');
+                    break;
+                }
+            }
+
+            // Convert numbered lists to bullet points
+            // Match patterns like "1. item 2. item" or "1) item 2) item"
+            const listPattern = /(\d+[\.\)]\s*)([^0-9]+?)(?=\s*\d+[\.\)]|$)/g;
+            const hasNumberedList = (mainContent.match(/\d+[\.\)]\s+\w/g) || []).length >= 2;
+
+            if (hasNumberedList) {
+                const items = [];
+                let lastIndex = 0;
+                let beforeList = '';
+                let match;
+
+                // Find the start of the list (first number)
+                const firstNumMatch = mainContent.match(/\d+[\.\)]\s+/);
+                if (firstNumMatch && firstNumMatch.index !== undefined) {
+                    beforeList = mainContent.substring(0, firstNumMatch.index);
+                    const listPart = mainContent.substring(firstNumMatch.index);
+
+                    // Extract list items
+                    const itemPattern = /\d+[\.\)]\s*([^0-9]+?)(?=\s*\d+[\.\)]|$)/g;
+                    let itemMatch;
+                    while ((itemMatch = itemPattern.exec(listPart)) !== null) {
+                        const itemText = itemMatch[1].trim().replace(/\s+/g, ' ');
+                        if (itemText) items.push(itemText);
+                    }
+                }
+
+                if (items.length >= 2) {
+                    const listHtml = '<ul class="reason-list">' +
+                        items.map(item => `<li>${highlightDatesAndNumbers(item)}</li>`).join('') +
+                        '</ul>';
+                    mainContent = beforeList + listHtml;
+                } else {
+                    mainContent = highlightDatesAndNumbers(mainContent);
+                }
+            } else {
+                mainContent = highlightDatesAndNumbers(mainContent);
+            }
+
+            // Build final HTML
+            let result = `<div class="reason-findings">${mainContent}</div>`;
+
+            if (nextAction) {
+                result += `<div class="reason-next">${highlightDatesAndNumbers(nextAction)}</div>`;
+            }
+
+            return result;
+        }
+
+        // Highlight dates and numbers/percentages
+        function highlightDatesAndNumbers(text) {
+            // Skip if text contains HTML tags (already processed)
+            if (/<[^>]+>/.test(text) && !/<\/?(ul|li|div|span)[^>]*>/i.test(text)) {
+                // Process only text between tags
+                return text.replace(/>(.*?)</g, (match, content) => {
+                    return '>' + highlightDatesAndNumbersInner(content) + '<';
+                });
+            }
+            return highlightDatesAndNumbersInner(text);
+        }
+
+        function highlightDatesAndNumbersInner(text) {
+            // Highlight dates (various formats)
+            // Jan 25, 2026 | January 25, 2026 | Jan 2026 | 2026-01-25
+            text = text.replace(
+                /\b((?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2}(?:,?\s+\d{4})?|\d{4}-\d{2}-\d{2})\b/gi,
+                '<span class="badge-date">$1</span>'
+            );
+
+            // Highlight percentages and key numbers
+            // >95%, 80%, 100%, etc.
+            text = text.replace(
+                /([<>≥≤]?\s*\d+(?:\.\d+)?%)/g,
+                '<span class="badge-number">$1</span>'
+            );
+
+            // Highlight key terms in parentheses that look like status/phase info
+            // (batch pipelines, data quality) - but keep short
+            text = text.replace(
+                /\(([^)]{5,40})\)/g,
+                (match, content) => {
+                    // Only badge if it looks like a key term (not a full sentence)
+                    if (!/\b(the|this|that|which|where|when)\b/i.test(content) && content.split(' ').length <= 6) {
+                        return `(<span class="badge-key">${content}</span>)`;
+                    }
+                    return match;
+                }
+            );
+
+            return text;
         }
 
         // Track if decision block has been shown for this session
