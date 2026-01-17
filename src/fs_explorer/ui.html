@@ -1145,6 +1145,7 @@
         let currentFolder = '.';
         let browsingPath = '.';
         let currentPhase = 0;
+        let skippedFiles = new Set();  // Track files marked as SKIP for backtrack detection
 
         // Tool styles
         const toolStyles = {
@@ -1167,11 +1168,36 @@
             navigate: '📁',
         };
 
-        // Backtrack detection regex
-        // Backtrack detection - detect when agent is following cross-references to previously skipped docs
-        // Should match: "backtrack", "going back", "need to check [doc] that I skipped"
-        // Should NOT match: just "references" alone (too common)
-        const backtrackPattern = /backtrack|going back|need to (check|parse|read).*([A-Za-z_]+\.(pdf|md)).*skip|previously skipped|revisit/i;
+        // Backtrack detection regex (for explicit language in reason)
+        // Matches: "backtrack", "going back", "previously skipped", "revisit", "going back to check"
+        const backtrackPattern = /backtrack|going back|previously skipped|revisit|returning to/i;
+
+        // Extract file names from SKIP categorizations
+        // Matches patterns like: "SKIP: file.pdf", "**SKIP** - file.pdf", "SKIP - file.pdf, other.pdf"
+        function extractSkippedFiles(reason) {
+            const files = [];
+            // Match SKIP followed by file names (with various separators and markdown formatting)
+            const skipMatch = reason.match(/\*?\*?SKIP\*?\*?[:\s\-]*([^\n]*)/gi);
+            if (skipMatch) {
+                skipMatch.forEach(match => {
+                    // Extract all file names from this SKIP section
+                    const filePattern = /([\w\-\_\.]+\.(pdf|md|docx?|txt|xlsx?|pptx?|html))/gi;
+                    let fileMatch;
+                    while ((fileMatch = filePattern.exec(match)) !== null) {
+                        files.push(fileMatch[1].toLowerCase());
+                    }
+                });
+            }
+            return files;
+        }
+
+        // Check if a file path matches any skipped file
+        function wasSkipped(filePath) {
+            if (!filePath) return false;
+            // Extract just the filename from the path
+            const fileName = filePath.split('/').pop().split('\\').pop().toLowerCase();
+            return skippedFiles.has(fileName);
+        }
 
         // Elements
         const queryInput = document.getElementById('queryInput');
@@ -1225,6 +1251,7 @@
 
             // Reset and show phase stepper
             currentPhase = 0;
+            skippedFiles.clear();  // Reset tracked skipped files
             phaseStepper.style.display = 'flex';
             resetPhases();
 
@@ -1281,10 +1308,19 @@
             const style = toolStyles[data.tool_name] || 'preview';
             const target = data.tool_input.directory || data.tool_input.file_path || '';
             const icon = toolIcons[data.tool_name] || '📄';
-            const isBacktracking = backtrackPattern.test(data.reason);
+
+            // Track skipped files from categorization (usually in scan_folder or first parse_file reason)
+            const newSkipped = extractSkippedFiles(data.reason);
+            newSkipped.forEach(f => skippedFiles.add(f));
+
+            // Detect backtracking: either explicit language OR parsing a previously skipped file
+            const hasExplicitBacktrack = backtrackPattern.test(data.reason);
+            const isParsing = data.tool_name === 'parse_file' || data.tool_name === 'preview_file' || data.tool_name === 'read';
+            const isParsingSkipped = isParsing && wasSkipped(target);
+            const isBacktracking = hasExplicitBacktrack || isParsingSkipped;
 
             // Update phase
-            updatePhase(data.tool_name, data.reason);
+            updatePhase(data.tool_name, data.reason, isBacktracking);
 
             const backtrackBadge = isBacktracking ? '<span class="backtrack-badge">Backtrack</span>' : '';
 
@@ -1313,7 +1349,12 @@
             stepCountEl.textContent = `${stepCount} ${stepCount === 1 ? 'step' : 'steps'}`;
 
             const icon = toolIcons['navigate'] || '📁';
-            const isBacktracking = backtrackPattern.test(data.reason);
+            // Track any skipped files mentioned in nav reason
+            const newSkipped = extractSkippedFiles(data.reason);
+            newSkipped.forEach(f => skippedFiles.add(f));
+
+            const hasExplicitBacktrack = backtrackPattern.test(data.reason);
+            const isBacktracking = hasExplicitBacktrack;
             const backtrackBadge = isBacktracking ? '<span class="backtrack-badge">Backtrack</span>' : '';
 
             const html = `
@@ -1553,8 +1594,8 @@
         }
 
         // Update phase based on tool and reason
-        function updatePhase(toolName, reason) {
-            const isBacktracking = backtrackPattern.test(reason);
+        function updatePhase(toolName, reason, isBacktracking = false) {
+            // isBacktracking is now passed in (includes both explicit language and auto-detected)
 
             // Determine target phase
             let targetPhase;

@@ -20,22 +20,25 @@ The following features are **working**:
 
 ## Issues to Fix
 
-### 1. BACKTRACK Badge Not Triggering
+### 1. BACKTRACK Badge Not Triggering - FIXED
 
 **Problem**: The agent goes back to previously skipped documents (e.g., db_conventions.pdf marked as SKIP gets parsed later) but the BACKTRACK badge doesn't appear.
 
-**Root Cause**: The backtrack pattern requires explicit language like "backtrack", "going back", "revisit", but the agent often says things like "Need to parse X to understand..." without explicit backtrack keywords.
+**Solution Implemented**: Option C - Track skipped files and auto-detect when they get parsed
 
-**Current Pattern** (line ~1171 in ui.html):
-```javascript
-const backtrackPattern = /backtrack|going back|need to (check|parse|read).*([A-Za-z_]+\.(pdf|md)).*skip|previously skipped|revisit/i;
-```
+**Changes made** (in ui.html):
+1. Added `skippedFiles` Set to track files marked as SKIP
+2. Added `extractSkippedFiles(reason)` function to parse SKIP markers from categorization
+3. Added `wasSkipped(filePath)` function to check if a file was previously skipped
+4. Modified `addStep()` to:
+   - Extract and track skipped files from each reason
+   - Detect backtracking via explicit keywords OR parsing a previously skipped file
+5. Updated `updatePhase()` to accept `isBacktracking` parameter directly
+6. Reset `skippedFiles` on new exploration
 
-**Possible Solutions**:
-- A) Make the pattern less strict (risk: false positives)
-- B) Modify the agent's SYSTEM_PROMPT to use explicit backtrack language more consistently
-- C) Track which files were marked SKIP in the decision block, then auto-detect when those files are parsed later
-- D) Accept that backtrack badge is best-effort and won't always trigger
+**Now triggers when**:
+- Explicit backtrack language is used (backtrack, going back, revisit, etc.)
+- A file that was marked SKIP is later parsed/read/previewed
 
 ### 2. Decision Block Feature (Deferred)
 
@@ -48,13 +51,11 @@ const backtrackPattern = /backtrack|going back|need to (check|parse|read).*([A-Z
 
 **If resuming**: The code for `parseCategorization()`, `createDecisionBlock()`, etc. is still in ui.html but not being called. Key insight: the categorization text appears in the FIRST parse_file step's reason, not in scan_folder's reason.
 
-### 3. Phase Stepper - BACKTRACK Phase Never Activates
+### 3. Phase Stepper - BACKTRACK Phase Never Activates - FIXED
 
 **Problem**: The phase stepper shows BACKTRACK as pending (gray) even when the agent is actually backtracking.
 
-**Root Cause**: Same as #1 - the `updatePhase()` function uses the same `backtrackPattern` to detect when to transition to phase 3.
-
-**Location**: `updatePhase()` function in ui.html
+**Solution**: Fixed along with #1 - `updatePhase()` now receives the `isBacktracking` flag directly from `addStep()`, which uses the improved detection logic (explicit keywords + auto-detection of parsing skipped files).
 
 ## Files
 
