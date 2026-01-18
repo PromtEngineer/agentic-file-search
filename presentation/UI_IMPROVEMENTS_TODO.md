@@ -40,16 +40,21 @@ The following features are **working**:
 - Explicit backtrack language is used (backtrack, going back, revisit, etc.)
 - A file that was marked SKIP is later parsed/read/previewed
 
-### 2. Decision Block Feature (Deferred)
+### 2. Decision Block Feature - IMPLEMENTED
 
-**What it was**: A visual block between SCAN and PARSE showing the categorization (RELEVANT/MAYBE/SKIP files in a structured layout).
+**What it is**: A visual block showing the agent's document categorization (RELEVANT/MAYBE/SKIP files in a structured grid layout).
 
-**Why removed**: Multiple bugs:
-- Appeared before scan instead of after
-- Wrong files extracted from reason text
-- Complex timing/ordering issues
+**Implementation**:
+- Grid layout with 3 columns (RELEVANT/MAYBE/SKIP)
+- Shows file counts per category
+- File items with hover states
+- Distinctive orange border and header styling
+- Appears after scan_folder showing how agent categorized documents
 
-**If resuming**: The code for `parseCategorization()`, `createDecisionBlock()`, etc. is still in ui.html but not being called. Key insight: the categorization text appears in the FIRST parse_file step's reason, not in scan_folder's reason.
+**Related changes**:
+- Cross-reference notification blocks (blue styling)
+- Thinking indicator with animated dots
+- Result panel completion states (success/error/uncertain)
 
 ### 3. Phase Stepper - BACKTRACK Phase Never Activates - FIXED
 

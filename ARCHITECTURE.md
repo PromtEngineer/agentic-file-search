@@ -34,7 +34,7 @@ graph TB
 
     subgraph "Intelligence Layer"
         AGENT[FsExplorer Agent]
-        LLM[Google Gemini 2.0 Flash<br/>Structured JSON Output]
+        LLM[Claude Sonnet (via ProxyPal)<br/>Structured JSON Output]
         PROMPT[System Prompt<br/>Three-Phase Strategy]
     end
 
@@ -151,7 +151,7 @@ graph TD
         TYPER[typer<br/>CLI Framework]
         RICH[rich<br/>Terminal UI]
         WORKFLOWS[llama-index-workflows<br/>Event System]
-        GENAI[google-genai<br/>Gemini API]
+        GENAI[openai<br/>ProxyPal API]
         PYDANTIC[pydantic<br/>Data Validation]
         DOCLING[docling<br/>Document Parsing]
     end
@@ -238,7 +238,7 @@ The core intelligence component that interacts with Google Gemini.
 ```mermaid
 classDiagram
     class FsExplorerAgent {
-        -_client: GenAIClient
+        -_client: AsyncOpenAI
         -_chat_history: list[Content]
         +token_usage: TokenUsage
         +__init__(api_key: str)
@@ -431,7 +431,7 @@ sequenceDiagram
     participant CLI as CLI (main.py)
     participant WF as Workflow
     participant Agent as FsExplorerAgent
-    participant LLM as Gemini API
+    participant LLM as ProxyPal API
     participant Tools as Tool Registry
     participant FS as Filesystem
 
@@ -739,8 +739,8 @@ flowchart TB
     subgraph "Cost Calculation"
         ADD_API --> TOTALS[Update totals]
         TOTALS --> CALC[_calculate_cost]
-        CALC --> INPUT_COST["input_cost = prompt_tokens × $0.075/1M"]
-        CALC --> OUTPUT_COST["output_cost = completion_tokens × $0.30/1M"]
+        CALC --> INPUT_COST["input_cost = prompt_tokens × $3.00/1M"]
+        CALC --> OUTPUT_COST["output_cost = completion_tokens × $15.00/1M"]
         INPUT_COST --> TOTAL_COST[total_cost]
         OUTPUT_COST --> TOTAL_COST
     end
@@ -758,17 +758,17 @@ flowchart TB
 ```mermaid
 graph LR
     subgraph "Gemini 2.0 Flash Pricing"
-        INPUT["Input: $0.075 / 1M tokens"]
-        OUTPUT["Output: $0.30 / 1M tokens"]
+        INPUT["Input: $3.00 / 1M tokens"]
+        OUTPUT["Output: $15.00 / 1M tokens"]
     end
 
     subgraph "Calculation"
         PROMPT[prompt_tokens] --> DIV1[÷ 1,000,000]
-        DIV1 --> MULT1[× $0.075]
+        DIV1 --> MULT1[× $3.00]
         MULT1 --> INPUT_COST[Input Cost]
 
         COMP[completion_tokens] --> DIV2[÷ 1,000,000]
-        DIV2 --> MULT2[× $0.30]
+        DIV2 --> MULT2[× $15.00]
         MULT2 --> OUTPUT_COST[Output Cost]
 
         INPUT_COST --> SUM[+]
@@ -867,7 +867,7 @@ sequenceDiagram
     participant CLI as main.py
     participant WF as Workflow
     participant Agent as FsExplorerAgent
-    participant LLM as Gemini API
+    participant LLM as ProxyPal API
     participant Tools as Tool Registry
     participant Docling
     participant Cache
@@ -1044,17 +1044,17 @@ SYSTEM_PROMPT = """
 | Full preview size | 3000 chars | ~2-3 pages |
 | Document cache | In-memory | Keyed by path + mtime |
 | Workflow timeout | 300 seconds | 5 minutes for complex queries |
-| API model | gemini-2.0-flash | Fast, cost-effective |
+| API model | claude-sonnet-4-20250514 | Via ProxyPal |
 
 ---
 
 ## Security Considerations
 
-1. **API Key**: Stored in environment variable `GOOGLE_API_KEY`
+1. **API Key**: Stored in environment variable `PROXYPAL_API_KEY`
 2. **Local Processing**: Documents parsed locally via Docling (no cloud upload)
 3. **Filesystem Access**: Limited to current working directory
 4. **No Persistent Storage**: Document cache is in-memory only
 
 ---
 
-*Last updated: 2026-01-03*
+*Last updated: 2026-01-18*
