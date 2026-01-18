@@ -260,12 +260,13 @@
             background: var(--bg-alt);
             border-left: 3px solid var(--ink-muted);
             padding: 16px 20px;
-            animation: appear 0.2s ease;
+            animation: appear 0.4s ease;
         }
 
         @keyframes appear {
-            from { opacity: 0; transform: translateX(-10px); }
-            to { opacity: 1; transform: translateX(0); }
+            0% { opacity: 0; transform: translateX(-10px); box-shadow: 0 0 0 rgba(196, 93, 58, 0); }
+            50% { opacity: 1; transform: translateX(0); box-shadow: 0 0 12px rgba(196, 93, 58, 0.3); }
+            100% { opacity: 1; transform: translateX(0); box-shadow: 0 0 0 rgba(196, 93, 58, 0); }
         }
 
         .step.scan { border-left-color: #0969da; }
@@ -279,58 +280,144 @@
 
         /* Decision Block - shows categorization between scan and parse */
         .decision-block {
-            background: linear-gradient(135deg, #f8f9fa 0%, #fff8e1 100%);
-            border: 2px dashed var(--accent);
-            border-radius: 8px;
-            padding: 16px 20px;
-            margin: 8px 0;
-            animation: appear 0.3s ease;
+            background: linear-gradient(135deg, #fafafa 0%, #fff8e1 100%);
+            border: 3px solid var(--accent);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 12px 0;
+            animation: appear 0.4s ease;
+            box-shadow: 0 4px 12px rgba(196, 93, 58, 0.1);
         }
 
         .decision-header {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
+            gap: 10px;
+            margin-bottom: 16px;
             font-weight: 600;
             color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
         }
 
         .decision-header .icon {
-            font-size: 18px;
+            font-size: 24px;
         }
 
         .decision-header .label {
-            font-size: 11px;
+            font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
         }
 
         .decision-content {
-            font-size: 13px;
+            font-size: 14px;
             line-height: 1.5;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
         }
 
         .decision-content .category {
             display: flex;
-            align-items: flex-start;
+            flex-direction: column;
             gap: 8px;
-            margin: 6px 0;
-            padding: 4px 0;
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .decision-content .category-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .decision-content .category-count {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'Instrument Serif', serif;
         }
 
         .decision-content .category-files {
-            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
         }
 
         .decision-content .file-item {
             display: inline-block;
-            background: var(--bg);
-            padding: 2px 8px;
-            margin: 2px 4px 2px 0;
+            background: var(--bg-alt);
+            padding: 4px 10px;
+            margin: 2px 0;
             border-radius: 4px;
             font-size: 12px;
-            font-family: var(--mono);
+            font-family: 'IBM Plex Mono', monospace;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .decision-content .file-item:hover {
+            background: var(--accent-light);
+            border-color: var(--accent);
+        }
+
+        /* Cross-Reference Notification Block */
+        .crossref-block {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 2px solid #1565c0;
+            border-left: 4px solid #1565c0;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin: 8px 0;
+            animation: appear 0.4s ease;
+        }
+
+        .crossref-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #1565c0;
+            margin-bottom: 8px;
+        }
+
+        .crossref-header .icon {
+            font-size: 18px;
+        }
+
+        .crossref-header .label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .crossref-content {
+            font-size: 13px;
+            color: #0d47a1;
+            line-height: 1.5;
+        }
+
+        .crossref-content .source-file {
+            font-weight: 600;
+            background: rgba(21, 101, 192, 0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .crossref-content .target-file {
+            font-weight: 600;
+            background: rgba(255, 193, 7, 0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .crossref-arrow {
+            color: #1565c0;
+            font-weight: bold;
+            margin: 4px 0;
+            display: block;
         }
 
         /* Retrieval Flag Badges */
@@ -391,26 +478,33 @@
         }
 
         .step-tool {
-            font-size: 11px;
+            font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--ink-light);
         }
 
         .step-target {
-            font-size: 13px;
-            color: var(--ink-light);
-            margin-bottom: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--ink);
+            background: var(--bg);
+            padding: 6px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 10px;
             word-break: break-all;
+            border: 1px solid var(--border);
         }
 
         .step-target::before {
             content: '→ ';
-            color: var(--ink-muted);
+            color: var(--accent);
+            font-weight: 700;
         }
 
         .step-reason {
-            font-size: 12px;
+            font-size: 14px;
             color: var(--ink-muted);
             font-style: normal;
             line-height: 1.6;
@@ -489,7 +583,7 @@
             font-size: 10px;
             border-radius: 3px;
             font-family: inherit;
-            white-space: nowrap;
+            /* Removed white-space: nowrap to prevent truncation in narrow containers */
         }
 
         .badge-number {
@@ -651,6 +745,72 @@
         @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
+        }
+
+        /* Thinking Indicator - shows agent is reasoning */
+        .thinking-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            color: var(--ink-muted);
+            font-size: 13px;
+            font-style: italic;
+            animation: fadeInOut 1.5s infinite;
+        }
+
+        .thinking-indicator::before {
+            content: '🧠';
+            font-size: 16px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .thinking-dots {
+            display: inline-flex;
+            gap: 3px;
+        }
+
+        .thinking-dots span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: dotPulse 1.4s infinite;
+        }
+
+        .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dotPulse {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* Result Panel Completion States */
+        .result-content.success {
+            border: 3px solid var(--success);
+            border-radius: 4px;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--bg) 0%, #e8f5e9 100%);
+        }
+
+        .result-content.error {
+            border: 3px solid var(--accent);
+            border-radius: 4px;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--bg) 0%, #fff3e0 100%);
+        }
+
+        .result-content.uncertain {
+            border: 3px solid #bf8700;
+            border-radius: 4px;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--bg) 0%, #fff8e1 100%);
         }
 
         /* Human Modal */
@@ -839,27 +999,66 @@
             margin-top: 4px;
         }
 
-        /* Phase Stepper */
+        /* Phase Stepper - Enhanced for presentations */
         .phase-stepper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 24px;
+            padding: 24px 32px;
+            background: linear-gradient(180deg, var(--bg-alt) 0%, var(--bg) 100%);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            position: relative;
+        }
+
+        .phase-stepper-inner {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0;
-            margin-bottom: 24px;
-            padding: 20px;
-            background: var(--bg-alt);
-            border: 1px solid var(--border);
+            position: relative;
+            z-index: 2;
         }
+
+        /* Progress bar beneath the phases */
+        .phase-progress-track {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .phase-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--success) 0%, #4ade80 100%);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .phase-progress-fill.phase-1 { width: 16.5%; }
+        .phase-progress-fill.phase-2 { width: 50%; }
+        .phase-progress-fill.phase-3 { width: 83%; }
+        .phase-progress-fill.complete { width: 100%; }
 
         .phase-step {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 12px 24px;
-            min-width: 140px;
-            border: 2px solid var(--border);
+            padding: 18px 36px;
+            min-width: 160px;
+            border: 3px solid var(--border);
             background: var(--bg);
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 10px;
+            position: relative;
         }
 
         .phase-step.pending {
@@ -869,60 +1068,84 @@
 
         .phase-step.active {
             border-color: var(--accent);
-            background: var(--accent-light);
+            background: linear-gradient(135deg, var(--accent-light) 0%, #fff8f5 100%);
+            box-shadow: 0 8px 24px rgba(196, 93, 58, 0.25), 0 0 0 4px rgba(196, 93, 58, 0.1);
+            transform: translateY(-4px);
         }
 
         .phase-step.active .phase-number {
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--accent) 0%, #d97653 100%);
             color: white;
             animation: pulse 1.5s infinite;
+            box-shadow: 0 4px 12px rgba(196, 93, 58, 0.4);
         }
 
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 0.9; }
         }
 
         .phase-step.done {
             border-color: var(--success);
-            background: #e8f5e9;
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
         }
 
         .phase-step.done .phase-number {
-            background: var(--success);
+            background: linear-gradient(135deg, var(--success) 0%, #34d399 100%);
             color: white;
+            box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
         }
 
         .phase-number {
-            width: 28px;
-            height: 28px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             background: var(--border);
             color: var(--ink-muted);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            transition: all 0.3s ease;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .phase-label {
-            font-size: 11px;
+            font-size: 13px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             font-weight: 600;
         }
 
         .phase-arrow {
-            font-size: 20px;
+            font-size: 24px;
             color: var(--border);
-            margin: 0 8px;
+            margin: 0 16px;
+            font-weight: bold;
+            transition: color 0.3s ease;
         }
 
         .phase-arrow.done {
             color: var(--success);
+        }
+
+        .phase-step.skipped {
+            border-color: var(--border);
+            background: var(--bg-alt);
+            opacity: 0.7;
+        }
+
+        .phase-step.skipped .phase-number {
+            background: var(--border);
+            color: var(--ink-muted);
+        }
+
+        .phase-step.skipped .phase-label::after {
+            content: ' (not needed)';
+            font-size: 10px;
+            font-weight: 400;
+            color: var(--ink-muted);
         }
 
         /* Backtrack Badge */
@@ -1084,6 +1307,650 @@
             color: var(--ink-muted);
             text-align: center;
         }
+
+        /* ==================== DEMO PRESENTATION MODE ==================== */
+
+        /* Step Spotlight Effect - Active step gets visual emphasis */
+        .step.spotlight-active {
+            transform: scale(1.01);
+            box-shadow: 0 0 15px rgba(193, 108, 54, 0.3), 0 2px 8px rgba(0, 0, 0, 0.08);
+            z-index: 10;
+            position: relative;
+            border-left-width: 4px;
+            transition: all 0.3s ease;
+            background: linear-gradient(90deg, var(--accent-light) 0%, var(--bg-alt) 20%);
+        }
+
+        /* Previous steps are slightly dimmed but still readable */
+        .steps-list.has-spotlight .step:not(.spotlight-active) {
+            opacity: 0.85;
+            transition: opacity 0.3s ease;
+        }
+
+        /* When no step is spotlighted, all steps are fully visible */
+        .steps-list:not(.has-spotlight) .step {
+            opacity: 1;
+        }
+
+        /* Step Timing Display */
+        .step-timing {
+            font-size: 11px;
+            color: var(--ink-muted);
+            margin-left: 8px;
+            font-weight: 400;
+            background: var(--bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid var(--border);
+        }
+
+        .step-timing.live {
+            color: var(--accent);
+            animation: timerPulse 1s infinite;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Pause/Resume Controls - Enhanced for presentations */
+        .demo-controls {
+            display: none;
+            align-items: center;
+            gap: 14px;
+            margin-left: auto;
+        }
+
+        .demo-controls.visible {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .demo-btn {
+            background: var(--bg);
+            border: 2px solid var(--ink);
+            padding: 10px 18px;
+            font-family: inherit;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .demo-btn:hover {
+            background: var(--ink);
+            color: var(--bg);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .demo-btn:active {
+            transform: translateY(0);
+        }
+
+        .demo-btn.paused {
+            background: linear-gradient(135deg, var(--accent) 0%, #d97653 100%);
+            border-color: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(196, 93, 58, 0.3);
+        }
+
+        .demo-btn.paused:hover {
+            background: linear-gradient(135deg, #a34d30 0%, #c45d3a 100%);
+            border-color: #a34d30;
+            transform: translateY(-1px);
+        }
+
+        /* Total Elapsed Timer */
+        .elapsed-timer {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--ink);
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #fff 0%, var(--bg-alt) 100%);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            min-width: 80px;
+            text-align: center;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        .elapsed-timer.running {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: linear-gradient(135deg, #fff8f5 0%, var(--accent-light) 100%);
+            animation: timerGlow 2s ease infinite;
+        }
+
+        @keyframes timerGlow {
+            0%, 100% { box-shadow: 0 0 0 rgba(196, 93, 58, 0); }
+            50% { box-shadow: 0 0 12px rgba(196, 93, 58, 0.3); }
+        }
+
+        /* Keyboard Shortcuts Hint */
+        .shortcuts-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--ink);
+            color: var(--bg);
+            padding: 12px 16px;
+            font-size: 11px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .shortcuts-hint.visible {
+            opacity: 1;
+        }
+
+        .shortcuts-hint kbd {
+            background: var(--bg);
+            color: var(--ink);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: inherit;
+            margin: 0 4px;
+        }
+
+        /* Session Manager - Enhanced for presentations */
+        .session-manager {
+            margin-top: 16px;
+            padding: 16px 20px;
+            background: linear-gradient(180deg, #fafafa 0%, var(--bg-alt) 100%);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            display: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .session-manager.visible {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .session-manager-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .session-manager-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--ink-muted);
+            font-weight: 600;
+        }
+
+        .session-manager-close {
+            background: none;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            color: var(--ink-muted);
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+
+        .session-manager-close:hover {
+            background: var(--bg-alt);
+            color: var(--ink);
+        }
+
+        .session-list {
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .session-list:empty::after {
+            content: 'No saved recordings yet';
+            display: block;
+            text-align: center;
+            color: var(--ink-muted);
+            font-style: italic;
+            padding: 20px;
+            font-size: 13px;
+        }
+
+        .session-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .session-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .session-item:hover {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, var(--accent-light) 0%, var(--bg) 100%);
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(196, 93, 58, 0.1);
+        }
+
+        .session-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .session-query {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 220px;
+            color: var(--ink);
+        }
+
+        .session-meta {
+            font-size: 11px;
+            color: var(--ink-muted);
+            margin-top: 2px;
+        }
+
+        .session-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: 12px;
+        }
+
+        .session-action-btn {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .session-action-btn:hover {
+            background: var(--ink);
+            color: var(--bg);
+            border-color: var(--ink);
+        }
+
+        .session-action-btn.delete {
+            color: var(--ink-muted);
+        }
+
+        .session-action-btn.delete:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: white;
+        }
+
+        /* Recordings Toggle Button in Header */
+        .recordings-toggle {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-alt);
+            border: 2px solid var(--border);
+            padding: 8px 14px;
+            font-family: inherit;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            margin-left: auto;
+        }
+
+        .recordings-toggle.visible {
+            display: flex;
+        }
+
+        .recordings-toggle:hover {
+            border-color: var(--ink);
+            background: var(--bg);
+        }
+
+        .recordings-toggle.active {
+            background: var(--ink);
+            color: var(--bg);
+            border-color: var(--ink);
+        }
+
+        .recordings-count {
+            background: var(--accent);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .recordings-toggle.active .recordings-count {
+            background: var(--bg);
+            color: var(--ink);
+        }
+
+        /* Session Manager Collapsed State */
+        .session-manager-collapsed {
+            display: none;
+            margin-top: 16px;
+            padding: 12px 20px;
+            background: linear-gradient(180deg, #fafafa 0%, var(--bg-alt) 100%);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            color: var(--ink-muted);
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .session-manager-collapsed.visible {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .session-manager-collapsed:hover {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, var(--accent-light) 0%, var(--bg) 100%);
+        }
+
+        .kbd-hint {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--ink-muted);
+        }
+
+        /* Replay Mode Indicator */
+        .replay-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #e3f2fd;
+            border: 2px solid #1565c0;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #1565c0;
+            font-weight: 500;
+        }
+
+        .replay-indicator.visible {
+            display: flex;
+        }
+
+        .replay-indicator::before {
+            content: '▶';
+        }
+
+        /* Fullscreen Presentation Mode */
+        body.presentation-mode {
+            background: #1a1a1a;
+        }
+
+        body.presentation-mode .page {
+            max-width: 100%;
+            padding: 20px 40px;
+        }
+
+        body.presentation-mode .masthead {
+            border-bottom-color: #444;
+        }
+
+        body.presentation-mode .site-title {
+            font-size: 52px;
+            color: #f4f1eb;
+        }
+
+        body.presentation-mode .version,
+        body.presentation-mode .status-indicator {
+            color: #888;
+        }
+
+        body.presentation-mode .status-dot {
+            background: #888;
+        }
+
+        body.presentation-mode .status-dot.active {
+            background: var(--success);
+        }
+
+        body.presentation-mode .folder-section {
+            display: none;
+        }
+
+        body.presentation-mode .query-section {
+            margin-bottom: 20px;
+        }
+
+        body.presentation-mode .query-input {
+            font-size: 20px;
+            background: #2a2a2a;
+            border-color: #444;
+            color: #f4f1eb;
+        }
+
+        body.presentation-mode .query-btn {
+            font-size: 14px;
+            padding: 16px 40px;
+        }
+
+        body.presentation-mode .phase-stepper {
+            background: #2a2a2a;
+            border-color: #444;
+            padding: 28px;
+        }
+
+        body.presentation-mode .phase-step {
+            background: #333;
+            border-color: #555;
+            min-width: 180px;
+            padding: 20px 36px;
+        }
+
+        body.presentation-mode .phase-step.pending {
+            color: #888;
+        }
+
+        body.presentation-mode .phase-step.active {
+            background: var(--accent-light);
+            border-color: var(--accent);
+        }
+
+        body.presentation-mode .phase-step.done {
+            background: #1a3d2a;
+            border-color: var(--success);
+        }
+
+        body.presentation-mode .phase-number {
+            width: 48px;
+            height: 48px;
+            font-size: 22px;
+        }
+
+        body.presentation-mode .phase-label {
+            font-size: 16px;
+        }
+
+        body.presentation-mode .phase-arrow {
+            font-size: 36px;
+            color: #555;
+        }
+
+        body.presentation-mode .phase-arrow.done {
+            color: var(--success);
+        }
+
+        body.presentation-mode .section-title,
+        body.presentation-mode .section-meta {
+            color: #888;
+        }
+
+        body.presentation-mode .section-header {
+            border-bottom-color: #444;
+        }
+
+        body.presentation-mode .step {
+            background: #2a2a2a;
+            font-size: 15px;
+        }
+
+        body.presentation-mode .step-id {
+            font-size: 14px;
+        }
+
+        body.presentation-mode .step-tool {
+            font-size: 15px;
+            color: #aaa;
+        }
+
+        body.presentation-mode .step-target {
+            font-size: 18px;
+            background: #333;
+            border-color: #555;
+            color: #f4f1eb;
+        }
+
+        body.presentation-mode .step-reason {
+            font-size: 15px;
+            color: #aaa;
+        }
+
+        body.presentation-mode .result-content {
+            background: #2a2a2a;
+            color: #f4f1eb;
+        }
+
+        body.presentation-mode .result-text {
+            font-size: 17px;
+        }
+
+        body.presentation-mode .decision-block {
+            background: linear-gradient(135deg, #2a2a2a 0%, #3a3020 100%);
+        }
+
+        body.presentation-mode .decision-content .category {
+            background: #333;
+            border-color: #555;
+        }
+
+        body.presentation-mode .crossref-block {
+            background: linear-gradient(135deg, #1a2a3a 0%, #223344 100%);
+        }
+
+        body.presentation-mode .stats-bar {
+            border-top-color: #444;
+        }
+
+        body.presentation-mode .stat-value {
+            color: #f4f1eb;
+            font-size: 28px;
+        }
+
+        body.presentation-mode .stat-label {
+            color: #888;
+        }
+
+        body.presentation-mode .footer {
+            border-top-color: #444;
+            color: #666;
+        }
+
+        body.presentation-mode .scrollable::-webkit-scrollbar-track {
+            background: #2a2a2a;
+        }
+
+        body.presentation-mode .scrollable::-webkit-scrollbar-thumb {
+            background: #555;
+        }
+
+        body.presentation-mode .demo-btn {
+            border-color: #666;
+            color: #f4f1eb;
+        }
+
+        body.presentation-mode .demo-btn:hover {
+            background: #f4f1eb;
+            color: #1a1a1a;
+        }
+
+        body.presentation-mode .elapsed-timer {
+            background: #333;
+            border-color: #555;
+            color: #f4f1eb;
+        }
+
+        body.presentation-mode .progress-bar {
+            background: #333;
+        }
+
+        /* Hide certain UI elements in presentation mode */
+        body.presentation-mode .session-manager,
+        body.presentation-mode .session-manager-collapsed {
+            display: none !important;
+        }
+
+        body.presentation-mode .recordings-toggle {
+            background: #333;
+            border-color: #555;
+            color: #f4f1eb;
+        }
+
+        body.presentation-mode .recordings-toggle:hover {
+            background: #444;
+            border-color: #666;
+        }
+
+        body.presentation-mode .recordings-toggle.active {
+            background: #f4f1eb;
+            color: #1a1a1a;
+            border-color: #f4f1eb;
+        }
     </style>
 </head>
 <body>
@@ -1093,6 +1960,25 @@
             <div class="title-block">
                 <h1 class="site-title">fs-explorer</h1>
                 <span class="version">v0.1.0</span>
+            </div>
+            <!-- Recordings Toggle -->
+            <button class="recordings-toggle" id="recordingsToggle" onclick="toggleSessionManager()">
+                <span>📼</span>
+                <span>Recordings</span>
+                <span class="recordings-count" id="recordingsCount">0</span>
+            </button>
+            <!-- Demo Controls -->
+            <div class="demo-controls" id="demoControls">
+                <div class="replay-indicator" id="replayIndicator">Replay Mode</div>
+                <span class="elapsed-timer" id="elapsedTimer">00:00</span>
+                <button class="demo-btn" id="pauseBtn" onclick="togglePause()" title="Space to toggle">
+                    <span id="pauseIcon">⏸</span>
+                    <span id="pauseText">Pause</span>
+                </button>
+                <button class="demo-btn" id="fullscreenBtn" onclick="toggleFullscreen()" title="F to toggle">
+                    <span>⛶</span>
+                    <span>Fullscreen</span>
+                </button>
             </div>
             <div class="status-indicator">
                 <div class="status-dot" id="statusDot"></div>
@@ -1128,6 +2014,29 @@
             </div>
         </section>
 
+        <!-- Session Manager (Expanded) -->
+        <div class="session-manager" id="sessionManager">
+            <div class="session-manager-header">
+                <span class="session-manager-title">Saved Recordings</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="kbd-hint">S</span>
+                    <button class="session-action-btn" onclick="collapseSessionManager()">Collapse</button>
+                </div>
+            </div>
+            <div class="session-list" id="sessionList">
+                <div style="color: var(--ink-muted); font-style: italic; padding: 8px;">No saved sessions</div>
+            </div>
+        </div>
+
+        <!-- Session Manager (Collapsed Mini-bar) -->
+        <div class="session-manager-collapsed" id="sessionManagerCollapsed" onclick="expandSessionManager()">
+            <span>📼</span>
+            <span id="collapsedCount">0</span>
+            <span>saved recordings</span>
+            <span class="kbd-hint">S</span>
+            <span style="color: var(--ink-muted);">— Click to expand</span>
+        </div>
+
         <!-- Progress -->
         <div class="progress-bar" id="progressBar">
             <div class="progress-fill"></div>
@@ -1135,19 +2044,24 @@
 
         <!-- Phase Stepper -->
         <div class="phase-stepper" id="phaseStepper" style="display: none;">
-            <div class="phase-step pending" id="phase1">
-                <div class="phase-number">1</div>
-                <div class="phase-label">Scan</div>
+            <div class="phase-stepper-inner">
+                <div class="phase-step pending" id="phase1">
+                    <div class="phase-number">1</div>
+                    <div class="phase-label">Scan</div>
+                </div>
+                <div class="phase-arrow" id="arrow1">→</div>
+                <div class="phase-step pending" id="phase2">
+                    <div class="phase-number">2</div>
+                    <div class="phase-label">Deep Dive</div>
+                </div>
+                <div class="phase-arrow" id="arrow2">→</div>
+                <div class="phase-step pending" id="phase3">
+                    <div class="phase-number">3</div>
+                    <div class="phase-label">Backtrack</div>
+                </div>
             </div>
-            <div class="phase-arrow" id="arrow1">→</div>
-            <div class="phase-step pending" id="phase2">
-                <div class="phase-number">2</div>
-                <div class="phase-label">Deep Dive</div>
-            </div>
-            <div class="phase-arrow" id="arrow2">→</div>
-            <div class="phase-step pending" id="phase3">
-                <div class="phase-number">3</div>
-                <div class="phase-label">Backtrack</div>
+            <div class="phase-progress-track">
+                <div class="phase-progress-fill" id="phaseProgressFill"></div>
             </div>
         </div>
 
@@ -1245,6 +2159,15 @@
         </div>
     </div>
 
+    <!-- Keyboard Shortcuts Hint -->
+    <div class="shortcuts-hint" id="shortcutsHint">
+        <kbd>Space</kbd> Pause/Resume
+        <kbd>F</kbd> Fullscreen
+        <kbd>R</kbd> Restart
+        <kbd>S</kbd> Recordings
+        <kbd>?</kbd> Help
+    </div>
+
     <script>
         // State
         let ws = null;
@@ -1255,6 +2178,16 @@
         let currentPhase = 0;
         let skippedFiles = new Set();  // Track files marked as SKIP for backtrack detection
         let referencedSkippedFiles = new Set();  // Track when skipped files are mentioned (cross-reference discovery)
+
+        // ==================== DEMO PRESENTATION MODE STATE ====================
+        let isPaused = false;
+        let messageQueue = [];
+        let sessionStartTime = null;
+        let stepStartTimes = {};  // Track start time for each step
+        let elapsedTimerInterval = null;
+        let isReplayMode = false;
+        let currentRecording = [];  // Messages being recorded
+        let lastQuery = '';  // Track query for recording
 
         // Tool styles
         const toolStyles = {
@@ -1278,8 +2211,9 @@
         };
 
         // Backtrack detection regex (for explicit language in reason)
-        // Matches: "backtrack", "going back", "previously skipped", "revisit", "going back to check"
-        const backtrackPattern = /backtrack|going back|previously skipped|revisit|returning to/i;
+        // STRICT: Only match explicit backtrack language, not generic "going back" etc.
+        // Also detect when agent revisits documents it previously categorized as MAYBE or SKIP
+        const backtrackPattern = /\bbacktrack(ing)?\b|returning to (a |the )?previously skipped|(document|file)?\s*I\s*(previously\s+)?categorized as (MAYBE|SKIP)/i;
 
         // Extract file names from SKIP categorizations
         // Matches patterns like: "SKIP: file.pdf", "**SKIP** - file.pdf", "SKIP - file.pdf, other.pdf"
@@ -1346,6 +2280,21 @@
         const arrow1 = document.getElementById('arrow1');
         const arrow2 = document.getElementById('arrow2');
 
+        // Demo mode elements
+        const demoControls = document.getElementById('demoControls');
+        const elapsedTimerEl = document.getElementById('elapsedTimer');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const pauseText = document.getElementById('pauseText');
+        const replayIndicator = document.getElementById('replayIndicator');
+        const sessionManager = document.getElementById('sessionManager');
+        const sessionListEl = document.getElementById('sessionList');
+        const sessionManagerCollapsed = document.getElementById('sessionManagerCollapsed');
+        const recordingsToggle = document.getElementById('recordingsToggle');
+        const recordingsCount = document.getElementById('recordingsCount');
+        const collapsedCount = document.getElementById('collapsedCount');
+        const shortcutsHint = document.getElementById('shortcutsHint');
+
         // Enter key
         queryInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !isRunning) startExploration();
@@ -1368,7 +2317,10 @@
 
             // Reset UI - clear steps and show empty state
             stepsList.innerHTML = '<div class="empty-state"><div class="prompt">Processing...</div><div class="hint">Starting exploration</div></div>';
+            stepsList.classList.remove('has-spotlight');  // Reset spotlight tracking
+            resultContent.className = 'result-content scrollable';  // Reset any completion state classes
             resultContent.innerHTML = '<div class="loading-text">Processing...</div>';
+            lastParsedFile = '';  // Reset tracking
             statsBar.style.display = 'none';
             progressBar.classList.add('active');
             stepCountEl.textContent = '—';
@@ -1377,8 +2329,27 @@
             currentPhase = 0;
             skippedFiles.clear();  // Reset tracked skipped files
             referencedSkippedFiles.clear();  // Reset cross-reference tracking
+            decisionBlockShown = false;  // Reset decision block tracking
             phaseStepper.style.display = 'flex';
             resetPhases();
+
+            // ===== DEMO MODE INITIALIZATION =====
+            isPaused = false;
+            messageQueue = [];
+            isReplayMode = false;
+            currentRecording = [];
+            lastQuery = query;
+            stepStartTimes = {};
+            sessionStartTime = Date.now();
+
+            // Show demo controls
+            demoControls.classList.add('visible');
+            replayIndicator.classList.remove('visible');
+            updatePauseButton();
+            startElapsedTimer();
+
+            // Collapse session manager during execution (keep mini-bar visible)
+            collapseSessionManager();
 
             updateStatus('Connecting', 'active');
 
@@ -1391,7 +2362,22 @@
                 ws.send(JSON.stringify({ task: query, folder: currentFolder }));
             };
 
-            ws.onmessage = (e) => handleMessage(JSON.parse(e.data));
+            ws.onmessage = (e) => {
+                const msg = JSON.parse(e.data);
+
+                // Record the message with timestamp
+                currentRecording.push({
+                    timestamp: Date.now() - sessionStartTime,
+                    data: msg
+                });
+
+                // Handle pause/resume queue
+                if (isPaused) {
+                    messageQueue.push(msg);
+                } else {
+                    handleMessage(msg);
+                }
+            };
             ws.onerror = () => {
                 showError('Connection failed. Is the server running?');
                 finish();
@@ -1420,39 +2406,62 @@
             }
         }
 
+        // Track last parsed file for cross-reference detection
+        let lastParsedFile = '';
+
         // Add step
         function addStep(data) {
+            // Remove thinking indicator when new step arrives
+            removeThinkingIndicator();
+
+            // Complete timing for previous step
+            const prevStepNum = data.step - 1;
+            if (prevStepNum > 0 && stepStartTimes[prevStepNum]) {
+                finalizeStepTiming(prevStepNum);
+            }
+
+            // Track start time for this step
+            stepStartTimes[data.step] = Date.now();
+
             // Clear empty state if this is the first step
             if (data.step === 1 && stepsList.querySelector('.empty-state')) {
                 stepsList.innerHTML = '';
+                stepsList.classList.add('has-spotlight');  // Enable spotlight dimming
             }
 
             stepCount = data.step;
             stepCountEl.textContent = `${stepCount} ${stepCount === 1 ? 'step' : 'steps'}`;
 
             const style = toolStyles[data.tool_name] || 'preview';
-            const target = data.tool_input.directory || data.tool_input.file_path || '';
+            const rawTarget = data.tool_input.directory || data.tool_input.file_path || '';
+            // Don't display "." as target - it's not meaningful
+            const target = (rawTarget === '.' || rawTarget === '') ? '' : rawTarget;
             const icon = toolIcons[data.tool_name] || '📄';
 
             // Track skipped files from categorization (usually in scan_folder or first parse_file reason)
             const newSkipped = extractSkippedFiles(data.reason);
             newSkipped.forEach(f => skippedFiles.add(f));
 
-            // Detect backtracking: either explicit language OR parsing a previously skipped file
+            // Detect backtracking: ONLY explicit backtrack language in the reason
+            // Do NOT auto-detect based on file names - too error prone
             const hasExplicitBacktrack = backtrackPattern.test(data.reason);
+            const isBacktracking = hasExplicitBacktrack;
             const isParsing = data.tool_name === 'parse_file' || data.tool_name === 'preview_file' || data.tool_name === 'read';
-            const isParsingSkipped = isParsing && wasSkipped(target);
-            const isBacktracking = hasExplicitBacktrack || isParsingSkipped;
 
-            // Update phase
+            // Update phase - simpler logic, only move to phase 3 on explicit backtrack
             updatePhase(data.tool_name, data.reason, isBacktracking);
 
             const backtrackBadge = isBacktracking ? '<span class="backtrack-badge">Backtrack</span>' : '';
 
+            // Remove spotlight from all previous steps
+            document.querySelectorAll('.step.spotlight-active').forEach(el => {
+                el.classList.remove('spotlight-active');
+            });
+
             const html = `
-                <div class="step ${style}">
+                <div class="step ${style} spotlight-active" data-step="${data.step}">
                     <div class="step-header">
-                        <span class="step-id">#${data.step}</span>
+                        <span class="step-id">#${data.step}<span class="step-timing live" id="stepTiming${data.step}">0.0s</span></span>
                         <span class="step-tool"><span class="tool-icon">${icon}</span>${data.tool_name}${backtrackBadge}</span>
                     </div>
                     ${target ? `<div class="step-target">${esc(target)}</div>` : ''}
@@ -1460,11 +2469,40 @@
                 </div>
             `;
             stepsList.insertAdjacentHTML('beforeend', html);
+
+            // Start live timing update for this step
+            updateStepTimingLive(data.step);
+
+            // NOTE: Removed auto cross-reference detection - was too error-prone
+            // Cross-references are now only shown when explicitly mentioned in backtrack steps
+
+            // If this step has categorization, show the decision block (only once per session)
+            if (!decisionBlockShown && hasCategorization(data.reason)) {
+                const categories = parseCategorization(data.reason);
+                const total = categories.relevant.length + categories.maybe.length + categories.skip.length;
+                if (total > 0) {
+                    const decisionHtml = createDecisionBlock(categories);
+                    stepsList.insertAdjacentHTML('beforeend', decisionHtml);
+                    decisionBlockShown = true;
+                }
+            }
+
+            // Track last parsed file for cross-reference detection
+            if (isParsing && target) {
+                lastParsedFile = target.split('/').pop().split('\\').pop();
+            }
+
+            // Add thinking indicator after step (agent is working on next action)
+            stepsList.insertAdjacentHTML('beforeend', createThinkingIndicator());
+
             stepsList.scrollTop = stepsList.scrollHeight;
         }
 
         // Add nav step
         function addNavStep(data) {
+            // Remove thinking indicator when new step arrives
+            removeThinkingIndicator();
+
             // Clear empty state if this is the first step
             if (data.step === 1 && stepsList.querySelector('.empty-state')) {
                 stepsList.innerHTML = '';
@@ -1493,11 +2531,18 @@
                 </div>
             `;
             stepsList.insertAdjacentHTML('beforeend', html);
+
+            // Add thinking indicator after step
+            stepsList.insertAdjacentHTML('beforeend', createThinkingIndicator());
+
             stepsList.scrollTop = stepsList.scrollHeight;
         }
 
         // Show human modal
         function showHumanModal(data) {
+            // Remove thinking indicator when waiting for human input
+            removeThinkingIndicator();
+
             document.getElementById('modalQuestion').textContent = data.question;
             document.getElementById('modalInput').value = '';
             humanModal.classList.add('active');
@@ -1515,6 +2560,9 @@
 
         // Show result
         function showResult(data) {
+            // Remove thinking indicator when results arrive
+            removeThinkingIndicator();
+
             if (data.error) {
                 showError(data.error);
                 return;
@@ -1530,6 +2578,20 @@
                 return `<span class="citation-badge">${esc(content)}</span>`;
             });
 
+            // Determine result state based on content
+            // Success: has clear answer with citations
+            // Uncertain: has hedging language or lacks citations
+            const hasConfidentAnswer = /found|identified|the answer|confirmed|determined/i.test(text);
+            const hasCitations = /\[Source:|citation-badge/i.test(html);
+            const hasUncertainty = /unclear|could not|unable|no information|not found|uncertain/i.test(text);
+
+            let stateClass = 'success'; // default
+            if (hasUncertainty || (!hasConfidentAnswer && !hasCitations)) {
+                stateClass = 'uncertain';
+            }
+
+            // Apply state class and render content
+            resultContent.className = `result-content scrollable ${stateClass}`;
             resultContent.innerHTML = `<div class="result-text markdown-content">${html}</div>`;
 
             // Stats
@@ -1544,11 +2606,44 @@
                 document.getElementById('statCost').textContent = '$' + s.estimated_cost.toFixed(4);
             }
 
+            // Mark current phase as done and handle Phase 3 "skipped" state
+            if (currentPhase === 1) {
+                phase1.className = 'phase-step done';
+                phase1.querySelector('.phase-number').textContent = '✓';
+            } else if (currentPhase === 2) {
+                // Mark Phase 1 and 2 as done
+                phase1.className = 'phase-step done';
+                phase1.querySelector('.phase-number').textContent = '✓';
+                phase2.className = 'phase-step done';
+                phase2.querySelector('.phase-number').textContent = '✓';
+                arrow1.className = 'phase-arrow done';
+                // Mark Phase 3 as skipped (not needed)
+                phase3.className = 'phase-step skipped';
+                arrow2.className = 'phase-arrow done';
+            } else if (currentPhase === 3) {
+                // All phases done
+                phase1.className = 'phase-step done';
+                phase1.querySelector('.phase-number').textContent = '✓';
+                phase2.className = 'phase-step done';
+                phase2.querySelector('.phase-number').textContent = '✓';
+                phase3.className = 'phase-step done';
+                phase3.querySelector('.phase-number').textContent = '✓';
+                arrow1.className = 'phase-arrow done';
+                arrow2.className = 'phase-arrow done';
+            }
+
+            // Mark progress bar as complete
+            updatePhaseProgress(currentPhase, true);
+
             updateStatus('Complete', '');
         }
 
         // Show error
         function showError(msg) {
+            // Remove thinking indicator
+            removeThinkingIndicator();
+
+            resultContent.className = 'result-content scrollable error';
             resultContent.innerHTML = `<div class="empty-state"><div class="prompt">Error</div><div class="hint">${esc(msg)}</div></div>`;
             updateStatus('Error', 'error');
         }
@@ -1558,7 +2653,31 @@
             isRunning = false;
             queryBtn.disabled = false;
             progressBar.classList.remove('active');
+            removeThinkingIndicator();  // Clean up any remaining thinking indicator
             if (ws) { ws.close(); ws = null; }
+
+            // ===== DEMO MODE CLEANUP =====
+            // Finalize last step timing
+            if (stepCount > 0 && stepStartTimes[stepCount]) {
+                finalizeStepTiming(stepCount);
+            }
+
+            // Stop elapsed timer
+            stopElapsedTimer();
+
+            // Remove spotlight from all steps
+            document.querySelectorAll('.step.spotlight-active').forEach(el => {
+                el.classList.remove('spotlight-active');
+            });
+            stepsList.classList.remove('has-spotlight');
+
+            // Save recording if we have messages (and not replay mode)
+            if (!isReplayMode && currentRecording.length > 0 && lastQuery) {
+                saveRecording(lastQuery, currentRecording);
+            }
+
+            // Update session manager
+            updateSessionList();
         }
 
         // Update status
@@ -1585,42 +2704,44 @@
 
         // Highlight retrieval flags in reason text
         function highlightFlags(text) {
-            // 1. Process markdown first (before escaping) to convert **bold** and *italic*
-            let html = processMarkdown(text);
+            // 1. Process flag patterns FIRST (before markdown), using callbacks for proper escaping
+            // This ensures we catch **RELEVANT** before it becomes <strong>RELEVANT</strong>
+            let processed = text;
 
-            // 2. Escape HTML but preserve our generated tags (<strong>, <em>)
+            // Helper to create flag replacement callback
+            const makeFlagReplacer = (flagClass, flagName) => {
+                return (match, filename) => {
+                    // Escape the filename to prevent XSS
+                    const safeFilename = esc(filename);
+                    return `<span class="flag-${flagClass}">${flagName}</span> <strong>${safeFilename}</strong>`;
+                };
+            };
+
+            // RELEVANT with filename - handle **RELEVANT** and plain RELEVANT
+            processed = processed.replace(/\*\*RELEVANT\*\*:?\s*-?\s*([^\s,\-\*<]+)/gi, makeFlagReplacer('relevant', 'RELEVANT'));
+            processed = processed.replace(/(?<![<"\w])RELEVANT:?\s*-?\s*([^\s,\-\*<]+)/gi, makeFlagReplacer('relevant', 'RELEVANT'));
+
+            // MAYBE with filename
+            processed = processed.replace(/\*\*MAYBE\*\*:?\s*-?\s*([^\s,\-\*<]+)/gi, makeFlagReplacer('maybe', 'MAYBE'));
+            processed = processed.replace(/(?<![<"\w])MAYBE:?\s*-?\s*([^\s,\-\*<]+)/gi, makeFlagReplacer('maybe', 'MAYBE'));
+
+            // SKIP with filename
+            processed = processed.replace(/\*\*SKIP\*\*:?\s*-?\s*([^\s,\-\*<]+)/gi, makeFlagReplacer('skip', 'SKIP'));
+            processed = processed.replace(/(?<![<"\w])SKIP:?\s*-?\s*([^\s,\-\*<]+)/gi, makeFlagReplacer('skip', 'SKIP'));
+
+            // 2. Now process remaining markdown (bold/italic)
+            let html = processMarkdown(processed);
+
+            // 3. Escape HTML but preserve our generated tags (<strong>, <em>, <span>)
             html = html.replace(/(<[^>]+>)|([^<]+)/g, (match, tag, content) => {
                 return tag || esc(content);
             });
 
-            let escaped = html;
-            // Handle markdown ** and plain formats
-            // RELEVANT with filename
-            escaped = escaped.replace(/\*?\*?RELEVANT\*?\*?:?\s*-?\s*([^\s,\-\*]+)/gi, '<span class="flag-relevant">RELEVANT</span> <strong>$1</strong>');
-            // MAYBE with filename
-            escaped = escaped.replace(/\*?\*?MAYBE\*?\*?:?\s*-?\s*([^\s,\-\*]+)/gi, '<span class="flag-maybe">MAYBE</span> <strong>$1</strong>');
-            // SKIP with filename
-            escaped = escaped.replace(/\*?\*?SKIP\*?\*?:?\s*-?\s*([^\s,\-\*]+)/gi, '<span class="flag-skip">SKIP</span> <strong>$1</strong>');
+            // Note: Inline cross-reference highlighting removed - the dedicated
+            // "CROSS-REFERENCE DISCOVERED" block provides clearer visibility
+            // without cluttering the reason text with badges
 
-            // Highlight cross-references to skipped files (shows when agent mentions a skipped file)
-            // Only highlight if the file name appears OUTSIDE of existing spans (not after SKIP badge)
-            skippedFiles.forEach(skippedFile => {
-                const baseName = skippedFile.replace(/\.(pdf|md|docx?)$/i, '');
-                const escapedBase = baseName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                // Match the filename, but NOT when preceded by </strong> (which follows SKIP badge)
-                // Use split/join approach to avoid lookbehind issues
-                const parts = escaped.split(/(<[^>]+>)/); // Split by HTML tags
-                escaped = parts.map((part, i) => {
-                    // Only process text nodes (odd indices are tags)
-                    if (i % 2 === 0 && part) {
-                        const pattern = new RegExp(`\\b(${escapedBase}(?:\\.(?:pdf|md|docx?))?)\\b`, 'gi');
-                        return part.replace(pattern, '<span class="flag-crossref">$1</span>');
-                    }
-                    return part;
-                }).join('');
-            });
-
-            return escaped;
+            return html;
         }
 
         // Format reason text with visual structure
@@ -1657,7 +2778,10 @@
             // Convert numbered lists to bullet points
             // Match patterns like "1. item 2. item" or "1) item 2) item"
             // Also handles items with HTML tags (from markdown processing)
-            const hasNumberedList = (mainContent.match(/\d+[\.\)]\s+/g) || []).length >= 2;
+            // Skip if content already has flag badges (categorization text) - splitting would break HTML
+            // IMPORTANT: Only match numbers at start of line/text to avoid matching dates like "Jan 20)"
+            const hasCategorization = /<span class="flag-(relevant|maybe|skip)">/i.test(mainContent);
+            const hasNumberedList = !hasCategorization && (mainContent.match(/(?:^|\n)\s*\d+[\.\)]\s+/g) || []).length >= 2;
 
             if (hasNumberedList) {
                 const items = [];
@@ -1715,14 +2839,36 @@
                         beforeList = mainContent.substring(0, dashListMatch.index + colonPart.length);
                         const listPart = mainContent.substring(dashListMatch.index + colonPart.length);
 
-                        // Split by " - " pattern (dash with spaces, followed by capital letter start)
-                        const dashItems = listPart.split(/\s+-\s+/).filter(p => p && p.trim());
+                        // Split by " - " or newline-dash patterns but NOT inside parentheses
+                        // Use a manual split approach to avoid breaking content like "(Jan - Feb)"
+                        let remaining = listPart;
+                        let parenDepth = 0;
+                        let currentItem = '';
 
-                        for (const item of dashItems) {
-                            const itemText = item.trim().replace(/\s+/g, ' ');
-                            if (itemText && itemText.length > 2) {
-                                items.push(itemText);
+                        for (let i = 0; i < remaining.length; i++) {
+                            const char = remaining[i];
+                            if (char === '(') parenDepth++;
+                            else if (char === ')') parenDepth = Math.max(0, parenDepth - 1);
+
+                            // Check for list item delimiters only when not inside parentheses:
+                            // - " - " (space-dash-space) for inline lists
+                            // - "\n- " (newline-dash-space) for multi-line lists
+                            const isSpaceDash = remaining.slice(i, i + 3) === ' - ';
+                            const isNewlineDash = (char === '\n' || char === '\r') && remaining.slice(i + 1, i + 3) === '- ';
+
+                            if (parenDepth === 0 && (isSpaceDash || isNewlineDash)) {
+                                if (currentItem.trim()) {
+                                    items.push(currentItem.trim().replace(/\s+/g, ' '));
+                                }
+                                currentItem = '';
+                                i += isSpaceDash ? 2 : 2; // Skip past delimiter (both are effectively 3 chars to next content)
+                            } else {
+                                currentItem += char;
                             }
+                        }
+                        // Don't forget the last item
+                        if (currentItem.trim() && currentItem.trim().length > 2) {
+                            items.push(currentItem.trim().replace(/\s+/g, ' '));
                         }
                     }
 
@@ -1732,10 +2878,10 @@
                             '</ul>';
                         mainContent = beforeList + listHtml;
                     } else {
-                        mainContent = highlightDatesAndNumbers(mainContent);
+                        mainContent = breakIntoParagraphs(mainContent);
                     }
                 } else {
-                    mainContent = highlightDatesAndNumbers(mainContent);
+                    mainContent = breakIntoParagraphs(mainContent);
                 }
             }
 
@@ -1777,19 +2923,101 @@
             );
 
             // Highlight key terms in parentheses that look like status/phase info
-            // (batch pipelines, data quality) - but keep short
+            // Only badge very short technical terms, not descriptive phrases
             text = text.replace(
-                /\(([^)]{5,40})\)/g,
+                /\(([^)]{5,30})\)/g,
                 (match, content) => {
-                    // Only badge if it looks like a key term (not a full sentence)
-                    if (!/\b(the|this|that|which|where|when)\b/i.test(content) && content.split(' ').length <= 6) {
-                        return `(<span class="badge-key">${content}</span>)`;
+                    // Only badge if it looks like a short technical term:
+                    // - 3 words or fewer
+                    // - No common words suggesting a descriptive phrase
+                    // - Looks like status/technical content
+                    const wordCount = content.split(/\s+/).length;
+                    const hasCommonWords = /\b(the|this|that|which|where|when|in|on|at|for|with|from|to|and|or)\b/i.test(content);
+                    const looksLikeStatus = /\b(complete|pending|required|needed|status|phase|step|see|per)\b/i.test(content);
+                    if (wordCount <= 3 && !hasCommonWords && looksLikeStatus) {
+                        return `(<span class="badge-key">${esc(content)}</span>)`;
                     }
                     return match;
                 }
             );
 
             return text;
+        }
+
+        // Break dense paragraph text into readable segments
+        function breakIntoParagraphs(text) {
+            // If text is short enough, just highlight and return
+            if (text.length < 150) {
+                return highlightDatesAndNumbers(text);
+            }
+
+            // Check if it's categorization text (don't split those - they have their own structure)
+            const isCategorization = /\b(RELEVANT|MAYBE|SKIP)\b/i.test(text);
+            if (isCategorization) {
+                return highlightDatesAndNumbers(text);
+            }
+
+            // Split on sentence boundaries: ". " followed by capital letter
+            // Be careful with abbreviations and HTML tags
+            const sentences = [];
+            let current = '';
+            let i = 0;
+
+            // Process character by character to handle edge cases
+            while (i < text.length) {
+                current += text[i];
+
+                // Check for sentence end: period + space + capital letter (not inside tags)
+                if (text[i] === '.' && i + 2 < text.length) {
+                    const nextChar = text[i + 1];
+                    const afterNext = text[i + 2];
+
+                    // Check if this looks like a sentence end
+                    if (nextChar === ' ' && /[A-Z]/.test(afterNext)) {
+                        // Skip common abbreviations: e.g., i.e., etc., Dr., Mr., vs.
+                        const lastWord = current.match(/\b(\w+)\.$/) || [];
+                        const abbrevs = ['e.g', 'i.e', 'etc', 'dr', 'mr', 'ms', 'vs', 'no', 'vol', 'ref'];
+                        if (!abbrevs.includes((lastWord[1] || '').toLowerCase())) {
+                            sentences.push(current.trim());
+                            current = '';
+                            i++; // Skip the space
+                        }
+                    }
+                }
+                i++;
+            }
+
+            // Add remaining text
+            if (current.trim()) {
+                sentences.push(current.trim());
+            }
+
+            // If we got meaningful segments (2+ sentences), format them
+            if (sentences.length >= 2) {
+                // Group related sentences into paragraphs (max 2-3 sentences per paragraph)
+                const paragraphs = [];
+                let para = [];
+
+                for (const sentence of sentences) {
+                    para.push(sentence);
+                    // Start new paragraph after 2 sentences, or if sentence is long (>100 chars)
+                    if (para.length >= 2 || sentence.length > 100) {
+                        paragraphs.push(para.join(' '));
+                        para = [];
+                    }
+                }
+                if (para.length > 0) {
+                    paragraphs.push(para.join(' '));
+                }
+
+                // Render as separate paragraphs with spacing
+                return paragraphs.map(p =>
+                    `<p style="margin: 6px 0;">${highlightDatesAndNumbers(p)}</p>`
+                ).join('');
+            }
+
+            // Fallback: just highlight
+            return highlightDatesAndNumbers(text);
         }
 
         // Track if decision block has been shown for this session
@@ -1815,64 +3043,130 @@
                 skip: []
             };
 
-            // File extension pattern
-            const filePattern = /[\w\-\_\.]+\.(pdf|md|docx?|txt|xlsx?|pptx?|html)/gi;
+            // File extension pattern - supports common document formats
+            const filePattern = /[\w\-\_\.]+\.(pdf|md|docx?|txt|xlsx?|pptx?|html|csv|json)/gi;
+
+            // Helper to dedupe files case-insensitively while preserving original case
+            const dedupeFiles = (files) => {
+                if (!files) return [];
+                const seen = new Set();
+                return files.filter(f => {
+                    const lower = f.toLowerCase();
+                    if (seen.has(lower)) return false;
+                    seen.add(lower);
+                    return true;
+                });
+            };
 
             // Split by category markers and extract files from each section
+            // Handles multiple formats: "RELEVANT:", "**RELEVANT**", "- RELEVANT -", bullets, numbered lists
             // Use negative lookahead to properly split sections
-            const relevantMatch = reason.match(/RELEVANT[:\s\-\*]*([\s\S]*?)(?=\s*-?\s*\*?\*?MAYBE|\s*-?\s*\*?\*?SKIP|$)/i);
+            const relevantMatch = reason.match(/(?:\*\*)?RELEVANT(?:\*\*)?[:\s\-\*]*([\s\S]*?)(?=\s*[-\*]?\s*\*?\*?MAYBE|\s*[-\*]?\s*\*?\*?SKIP|$)/i);
             if (relevantMatch) {
                 const files = relevantMatch[1].match(filePattern);
-                if (files) categories.relevant = [...new Set(files)]; // dedupe
+                categories.relevant = dedupeFiles(files);
             }
 
-            const maybeMatch = reason.match(/MAYBE[:\s\-\*]*([\s\S]*?)(?=\s*-?\s*\*?\*?SKIP|\s*-?\s*\*?\*?RELEVANT|$)/i);
+            const maybeMatch = reason.match(/(?:\*\*)?MAYBE(?:\*\*)?[:\s\-\*]*([\s\S]*?)(?=\s*[-\*]?\s*\*?\*?SKIP|\s*[-\*]?\s*\*?\*?RELEVANT|$)/i);
             if (maybeMatch) {
                 const files = maybeMatch[1].match(filePattern);
-                if (files) categories.maybe = [...new Set(files)];
+                categories.maybe = dedupeFiles(files);
             }
 
-            const skipMatch = reason.match(/SKIP[:\s\-\*]*([\s\S]*?)(?=\s*-?\s*\*?\*?RELEVANT|\s*-?\s*\*?\*?MAYBE|$)/i);
+            const skipMatch = reason.match(/(?:\*\*)?SKIP(?:\*\*)?[:\s\-\*]*([\s\S]*?)(?=\s*[-\*]?\s*\*?\*?RELEVANT|\s*[-\*]?\s*\*?\*?MAYBE|$)/i);
             if (skipMatch) {
                 const files = skipMatch[1].match(filePattern);
-                if (files) categories.skip = [...new Set(files)];
+                categories.skip = dedupeFiles(files);
             }
 
-            // Remove duplicates: files in RELEVANT take priority over MAYBE/SKIP
-            const relevantSet = new Set(categories.relevant);
-            const maybeSet = new Set(categories.maybe);
-            categories.maybe = categories.maybe.filter(f => !relevantSet.has(f));
-            categories.skip = categories.skip.filter(f => !relevantSet.has(f) && !maybeSet.has(f));
+            // Remove duplicates across categories: RELEVANT > MAYBE > SKIP priority
+            const relevantSet = new Set(categories.relevant.map(f => f.toLowerCase()));
+            const maybeSet = new Set(categories.maybe.map(f => f.toLowerCase()));
+            categories.maybe = categories.maybe.filter(f => !relevantSet.has(f.toLowerCase()));
+            categories.skip = categories.skip.filter(f => !relevantSet.has(f.toLowerCase()) && !maybeSet.has(f.toLowerCase()));
 
             return categories;
         }
 
-        // Create decision block HTML
+        // Create decision block HTML with counts and enhanced layout
         function createDecisionBlock(categories) {
-            const renderFiles = (files) => files.map(f => `<span class="file-item">${esc(f)}</span>`).join('');
+            const renderFiles = (files) => files.length > 0
+                ? files.map(f => `<span class="file-item">${esc(f)}</span>`).join('')
+                : '<em style="color: var(--ink-muted); font-size: 11px;">none</em>';
+
+            const total = categories.relevant.length + categories.maybe.length + categories.skip.length;
 
             return `
                 <div class="decision-block">
                     <div class="decision-header">
-                        <span class="icon">🧠</span>
-                        <span class="label">Agent Decision: Document Categorization</span>
+                        <span class="icon">📊</span>
+                        <span class="label">Agent's Document Categorization (${total} files)</span>
                     </div>
                     <div class="decision-content">
-                        <div class="category">
-                            <span class="flag-relevant">RELEVANT</span>
-                            <div class="category-files">${categories.relevant.length ? renderFiles(categories.relevant) : '<em>none</em>'}</div>
+                        <div class="category" style="border-color: #28a745;">
+                            <div class="category-header">
+                                <span class="flag-relevant">✓ RELEVANT</span>
+                                <span class="category-count">${categories.relevant.length}</span>
+                            </div>
+                            <div class="category-files">${renderFiles(categories.relevant)}</div>
                         </div>
-                        <div class="category">
-                            <span class="flag-maybe">MAYBE</span>
-                            <div class="category-files">${categories.maybe.length ? renderFiles(categories.maybe) : '<em>none</em>'}</div>
+                        <div class="category" style="border-color: #ffc107;">
+                            <div class="category-header">
+                                <span class="flag-maybe">? MAYBE</span>
+                                <span class="category-count">${categories.maybe.length}</span>
+                            </div>
+                            <div class="category-files">${renderFiles(categories.maybe)}</div>
                         </div>
-                        <div class="category">
-                            <span class="flag-skip">SKIP</span>
-                            <div class="category-files">${categories.skip.length ? renderFiles(categories.skip) : '<em>none</em>'}</div>
+                        <div class="category" style="border-color: #dc3545;">
+                            <div class="category-header">
+                                <span class="flag-skip">✗ SKIP</span>
+                                <span class="category-count">${categories.skip.length}</span>
+                            </div>
+                            <div class="category-files">${renderFiles(categories.skip)}</div>
                         </div>
                     </div>
                 </div>
             `;
+        }
+
+        // Create cross-reference notification block
+        function createCrossRefBlock(sourceFile, targetFile, wasSkipped) {
+            const skippedNote = wasSkipped
+                ? '<span class="crossref-arrow">→ May trigger backtracking</span>'
+                : '';
+
+            return `
+                <div class="crossref-block">
+                    <div class="crossref-header">
+                        <span class="icon">🔗</span>
+                        <span class="label">Cross-Reference Discovered</span>
+                    </div>
+                    <div class="crossref-content">
+                        <span class="source-file">${esc(sourceFile)}</span> references
+                        <span class="target-file">${esc(targetFile)}</span>
+                        ${wasSkipped ? ' (previously skipped)' : ''}
+                        ${skippedNote}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Create thinking indicator
+        function createThinkingIndicator() {
+            return `
+                <div class="thinking-indicator" id="thinkingIndicator">
+                    Agent reasoning
+                    <div class="thinking-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Remove thinking indicator
+        function removeThinkingIndicator() {
+            const indicator = document.getElementById('thinkingIndicator');
+            if (indicator) indicator.remove();
         }
 
         // Extract the action-specific reason (after categorization)
@@ -1925,50 +3219,70 @@
 
         // Update phase based on tool and reason
         function updatePhase(toolName, reason, isBacktracking = false) {
-            // isBacktracking is now passed in (includes both explicit language and auto-detected)
+            // SIMPLE PHASE LOGIC:
+            // Phase 1 (SCAN): scan_folder tool
+            // Phase 2 (DEEP DIVE): parse_file, preview_file, read tools (when NOT backtracking)
+            // Phase 3 (BACKTRACK): ONLY when isBacktracking is explicitly true
 
-            // Determine target phase
             let targetPhase;
+
             if (isBacktracking) {
+                // ONLY go to phase 3 when explicitly backtracking
                 targetPhase = 3;
             } else if (toolName === 'scan_folder') {
                 targetPhase = 1;
             } else if (toolName === 'parse_file' || toolName === 'preview_file' || toolName === 'read') {
+                // Deep dive phase - stay here unless backtracking
                 targetPhase = 2;
             } else {
-                // grep, glob, navigate stay in current phase or default to 2
-                targetPhase = currentPhase || 2;
+                // grep, glob, navigate - stay in current phase, minimum phase 1
+                targetPhase = Math.max(currentPhase, 1);
             }
 
-            // Only advance phase, never go back (unless backtracking)
-            if (targetPhase > currentPhase || (isBacktracking && targetPhase === 3)) {
-                // Mark previous phases as done
-                if (currentPhase >= 1) {
-                    phase1.className = 'phase-step done';
-                    phase1.querySelector('.phase-number').textContent = '✓';
-                    arrow1.className = 'phase-arrow done';
-                }
-                if (currentPhase >= 2 || targetPhase === 3) {
-                    phase2.className = 'phase-step done';
-                    phase2.querySelector('.phase-number').textContent = '✓';
-                    arrow2.className = 'phase-arrow done';
-                }
-
+            // Only advance phase forward (never go back unless to phase 3 for backtrack)
+            if (targetPhase > currentPhase) {
                 currentPhase = targetPhase;
             }
 
-            // Set current phase as active
+            // Update visual state of all phases
             const phases = [null, phase1, phase2, phase3];
-            if (phases[currentPhase]) {
-                // First ensure previous phases are done
-                for (let i = 1; i < currentPhase; i++) {
-                    if (phases[i].className !== 'phase-step done') {
-                        phases[i].className = 'phase-step done';
-                        phases[i].querySelector('.phase-number').textContent = '✓';
-                    }
+            const arrows = [null, arrow1, arrow2];
+
+            for (let i = 1; i <= 3; i++) {
+                if (i < currentPhase) {
+                    // Past phases: done
+                    phases[i].className = 'phase-step done';
+                    phases[i].querySelector('.phase-number').textContent = '✓';
+                    if (arrows[i]) arrows[i].className = 'phase-arrow done';
+                } else if (i === currentPhase) {
+                    // Current phase: active
+                    phases[i].className = 'phase-step active';
+                    phases[i].querySelector('.phase-number').textContent = i.toString();
+                } else {
+                    // Future phases: pending
+                    phases[i].className = 'phase-step pending';
+                    phases[i].querySelector('.phase-number').textContent = i.toString();
+                    if (arrows[i]) arrows[i].className = 'phase-arrow';
                 }
-                // Then set current as active
-                phases[currentPhase].className = 'phase-step active';
+            }
+
+            // Update progress bar
+            updatePhaseProgress(currentPhase);
+        }
+
+        function updatePhaseProgress(phase, isComplete = false) {
+            const progressFill = document.getElementById('phaseProgressFill');
+            if (!progressFill) return;
+
+            progressFill.className = 'phase-progress-fill';
+            if (isComplete) {
+                progressFill.classList.add('complete');
+            } else if (phase === 1) {
+                progressFill.classList.add('phase-1');
+            } else if (phase === 2) {
+                progressFill.classList.add('phase-2');
+            } else if (phase === 3) {
+                progressFill.classList.add('phase-3');
             }
         }
 
@@ -2037,7 +3351,371 @@
             closeFolderPicker();
         }
 
-        // Initialize with current directory
+        // ==================== DEMO PRESENTATION MODE FUNCTIONS ====================
+
+        // Elapsed Timer
+        function startElapsedTimer() {
+            elapsedTimerEl.classList.add('running');
+            elapsedTimerEl.textContent = '00:00';
+            elapsedTimerInterval = setInterval(() => {
+                if (sessionStartTime && !isPaused) {
+                    const elapsed = Date.now() - sessionStartTime;
+                    elapsedTimerEl.textContent = formatElapsedTime(elapsed);
+                }
+            }, 100);
+        }
+
+        function stopElapsedTimer() {
+            elapsedTimerEl.classList.remove('running');
+            if (elapsedTimerInterval) {
+                clearInterval(elapsedTimerInterval);
+                elapsedTimerInterval = null;
+            }
+        }
+
+        function formatElapsedTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Step Timing
+        function updateStepTimingLive(stepNum) {
+            const timingEl = document.getElementById(`stepTiming${stepNum}`);
+            if (!timingEl || !stepStartTimes[stepNum]) return;
+
+            const updateTiming = () => {
+                if (!stepStartTimes[stepNum] || timingEl.classList.contains('finalized')) return;
+                const elapsed = (Date.now() - stepStartTimes[stepNum]) / 1000;
+                timingEl.textContent = elapsed.toFixed(1) + 's';
+                if (isRunning && !isPaused) {
+                    requestAnimationFrame(updateTiming);
+                }
+            };
+            updateTiming();
+        }
+
+        function finalizeStepTiming(stepNum) {
+            const timingEl = document.getElementById(`stepTiming${stepNum}`);
+            if (!timingEl || !stepStartTimes[stepNum]) return;
+
+            const elapsed = (Date.now() - stepStartTimes[stepNum]) / 1000;
+            timingEl.textContent = elapsed.toFixed(1) + 's';
+            timingEl.classList.remove('live');
+            timingEl.classList.add('finalized');
+        }
+
+        // Pause/Resume
+        function togglePause() {
+            if (!isRunning) return;
+            isPaused = !isPaused;
+            updatePauseButton();
+
+            if (!isPaused) {
+                // Resume: process queued messages
+                while (messageQueue.length > 0) {
+                    const msg = messageQueue.shift();
+                    handleMessage(msg);
+                }
+            }
+
+            updateStatus(isPaused ? 'Paused' : 'Executing', 'active');
+        }
+
+        function updatePauseButton() {
+            if (isPaused) {
+                pauseIcon.textContent = '▶';
+                pauseText.textContent = 'Resume';
+                pauseBtn.classList.add('paused');
+            } else {
+                pauseIcon.textContent = '⏸';
+                pauseText.textContent = 'Pause';
+                pauseBtn.classList.remove('paused');
+            }
+        }
+
+        // Fullscreen Presentation Mode
+        function toggleFullscreen() {
+            document.body.classList.toggle('presentation-mode');
+
+            // Also request actual fullscreen if supported
+            if (document.body.classList.contains('presentation-mode')) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(e => {});
+                }
+            } else {
+                if (document.fullscreenElement && document.exitFullscreen) {
+                    document.exitFullscreen().catch(e => {});
+                }
+            }
+        }
+
+        // Restart same query
+        function restartQuery() {
+            if (!lastQuery) return;
+            queryInput.value = lastQuery;
+            startExploration();
+        }
+
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ignore if typing in input fields
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            switch (e.key.toLowerCase()) {
+                case ' ':
+                    e.preventDefault();
+                    if (isRunning) togglePause();
+                    break;
+                case 'f':
+                    e.preventDefault();
+                    toggleFullscreen();
+                    break;
+                case 'r':
+                    e.preventDefault();
+                    restartQuery();
+                    break;
+                case 's':
+                    e.preventDefault();
+                    toggleSessionManager();
+                    break;
+                case '?':
+                    e.preventDefault();
+                    showShortcutsHint();
+                    break;
+                case 'escape':
+                    // Exit fullscreen mode
+                    if (document.body.classList.contains('presentation-mode')) {
+                        toggleFullscreen();
+                    }
+                    break;
+            }
+        });
+
+        // Show shortcuts hint
+        let shortcutsTimeout = null;
+        function showShortcutsHint() {
+            shortcutsHint.classList.add('visible');
+            if (shortcutsTimeout) clearTimeout(shortcutsTimeout);
+            shortcutsTimeout = setTimeout(() => {
+                shortcutsHint.classList.remove('visible');
+            }, 3000);
+        }
+
+        // ==================== SESSION RECORDING & REPLAY ====================
+
+        const STORAGE_KEY = 'fsExplorerSessions';
+
+        function getSavedSessions() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                console.error('Failed to load sessions:', e);
+                return [];
+            }
+        }
+
+        function saveSessions(sessions) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+            } catch (e) {
+                console.error('Failed to save sessions:', e);
+            }
+        }
+
+        function saveRecording(query, messages) {
+            const sessions = getSavedSessions();
+            const session = {
+                id: Date.now(),
+                query: query,
+                timestamp: new Date().toISOString(),
+                messages: messages,
+                stepCount: stepCount
+            };
+            sessions.unshift(session);  // Add to beginning
+            // Keep only last 10 sessions
+            if (sessions.length > 10) sessions.pop();
+            saveSessions(sessions);
+        }
+
+        function deleteSession(sessionId) {
+            let sessions = getSavedSessions();
+            sessions = sessions.filter(s => s.id !== sessionId);
+            saveSessions(sessions);
+            updateSessionList();
+        }
+
+        // Session manager state: 'hidden', 'collapsed', 'expanded'
+        let sessionManagerState = 'hidden';
+
+        function toggleSessionManager() {
+            // Toggle between expanded and collapsed (keyboard shortcut 'S')
+            if (sessionManagerState === 'expanded') {
+                collapseSessionManager();
+            } else {
+                expandSessionManager();
+            }
+        }
+
+        function expandSessionManager() {
+            const sessions = getSavedSessions();
+            if (sessions.length === 0) return; // Don't expand if no sessions
+
+            sessionManagerState = 'expanded';
+            sessionManager.classList.add('visible');
+            sessionManagerCollapsed.classList.remove('visible');
+            recordingsToggle.classList.add('active');
+            updateSessionList();
+        }
+
+        function collapseSessionManager() {
+            const sessions = getSavedSessions();
+            sessionManagerState = sessions.length > 0 ? 'collapsed' : 'hidden';
+            sessionManager.classList.remove('visible');
+
+            if (sessions.length > 0) {
+                sessionManagerCollapsed.classList.add('visible');
+            } else {
+                sessionManagerCollapsed.classList.remove('visible');
+            }
+            recordingsToggle.classList.remove('active');
+        }
+
+        function hideSessionManager() {
+            // Fully hide both expanded and collapsed states
+            sessionManagerState = 'hidden';
+            sessionManager.classList.remove('visible');
+            sessionManagerCollapsed.classList.remove('visible');
+            recordingsToggle.classList.remove('active');
+        }
+
+        function updateSessionList() {
+            const sessions = getSavedSessions();
+            const count = sessions.length;
+
+            // Update all count displays
+            recordingsCount.textContent = count;
+            collapsedCount.textContent = count;
+
+            // Show/hide recordings toggle based on count
+            if (count > 0) {
+                recordingsToggle.classList.add('visible');
+            } else {
+                recordingsToggle.classList.remove('visible');
+                // If no sessions, fully hide the session manager
+                hideSessionManager();
+            }
+
+            // Update session list content
+            if (count === 0) {
+                sessionListEl.innerHTML = '<div style="color: var(--ink-muted); font-style: italic; padding: 8px;">No saved sessions</div>';
+                return;
+            }
+
+            sessionListEl.innerHTML = sessions.map(session => {
+                const date = new Date(session.timestamp);
+                const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const queryPreview = session.query.length > 30 ? session.query.substring(0, 30) + '...' : session.query;
+
+                return `
+                    <div class="session-item" onclick="replaySession(${session.id})">
+                        <div class="session-info">
+                            <div class="session-query">${esc(queryPreview)}</div>
+                            <div class="session-meta">${dateStr} · ${session.stepCount} steps</div>
+                        </div>
+                        <div class="session-actions">
+                            <button class="session-action-btn" onclick="event.stopPropagation(); replaySession(${session.id})">▶ Play</button>
+                            <button class="session-action-btn delete" onclick="event.stopPropagation(); deleteSession(${session.id})">✕</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Replay a saved session
+        async function replaySession(sessionId) {
+            const sessions = getSavedSessions();
+            const session = sessions.find(s => s.id === sessionId);
+            if (!session) return;
+
+            // Close any existing connections
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+
+            isRunning = true;
+            isReplayMode = true;
+            stepCount = 0;
+            queryBtn.disabled = true;
+            queryInput.value = session.query;
+            lastQuery = session.query;
+
+            // Reset UI
+            stepsList.innerHTML = '<div class="empty-state"><div class="prompt">Replaying...</div><div class="hint">Playing back recorded session</div></div>';
+            stepsList.classList.remove('has-spotlight');
+            resultContent.className = 'result-content scrollable';
+            resultContent.innerHTML = '<div class="loading-text">Replaying session...</div>';
+            lastParsedFile = '';
+            statsBar.style.display = 'none';
+            progressBar.classList.add('active');
+            stepCountEl.textContent = '—';
+
+            // Reset phases
+            currentPhase = 0;
+            skippedFiles.clear();
+            referencedSkippedFiles.clear();
+            decisionBlockShown = false;
+            phaseStepper.style.display = 'flex';
+            resetPhases();
+
+            // Setup demo mode for replay
+            isPaused = false;
+            messageQueue = [];
+            stepStartTimes = {};
+            sessionStartTime = Date.now();
+
+            // Show demo controls with replay indicator
+            demoControls.classList.add('visible');
+            replayIndicator.classList.add('visible');
+            updatePauseButton();
+            startElapsedTimer();
+
+            updateStatus('Replaying', 'active');
+
+            // Collapse session manager (keep mini-bar visible)
+            collapseSessionManager();
+
+            // Replay messages with original timing
+            let prevTimestamp = 0;
+            for (let i = 0; i < session.messages.length; i++) {
+                const msg = session.messages[i];
+
+                // Wait for the time difference (scaled down for faster replay)
+                const delay = Math.min(msg.timestamp - prevTimestamp, 2000);  // Cap at 2 seconds
+                prevTimestamp = msg.timestamp;
+
+                if (delay > 50) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+
+                // Check for pause
+                while (isPaused) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                // Check if we're still replaying
+                if (!isReplayMode) break;
+
+                handleMessage(msg.data);
+            }
+
+            finish();
+        }
+
+        // Initialize with current directory and load sessions
         (async function init() {
             try {
                 const res = await fetch('/api/folders?path=.');
@@ -2048,6 +3726,15 @@
                 }
             } catch (e) {
                 console.error('Failed to get initial folder:', e);
+            }
+
+            // Load saved sessions and update UI
+            updateSessionList();
+
+            // If there are saved sessions, show them expanded by default
+            const sessions = getSavedSessions();
+            if (sessions.length > 0) {
+                expandSessionManager();
             }
         })();
     </script>
