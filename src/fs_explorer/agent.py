@@ -78,8 +78,12 @@ class TokenUsage:
 
     def _calculate_cost(self) -> tuple[float, float, float]:
         """Calculate estimated costs based on Claude Sonnet pricing."""
-        input_cost = (self.prompt_tokens / 1_000_000) * CLAUDE_SONNET_INPUT_COST_PER_MILLION
-        output_cost = (self.completion_tokens / 1_000_000) * CLAUDE_SONNET_OUTPUT_COST_PER_MILLION
+        input_cost = (
+            self.prompt_tokens / 1_000_000
+        ) * CLAUDE_SONNET_INPUT_COST_PER_MILLION
+        output_cost = (
+            self.completion_tokens / 1_000_000
+        ) * CLAUDE_SONNET_OUTPUT_COST_PER_MILLION
         return input_cost, output_cost, input_cost + output_cost
 
     def summary(self) -> str:
@@ -150,6 +154,12 @@ When you encounter a folder with documents:
    - **MAYBE**: Documents that might be relevant (list them)
    - **SKIP**: Documents not relevant (list them)
 
+**Categorization Guidelines:**
+- **RELEVANT**: Preview contains query keywords OR filename clearly suggests relevance (e.g., "purchase_agreement.pdf" for a pricing query)
+- **MAYBE**: Preview is ambiguous OR filename might be relevant but content unclear (e.g., "exhibits.pdf" could contain anything)
+- **SKIP**: Clearly unrelated content AND filename doesn't suggest relevance (e.g., "employee_handbook.pdf" for a financial query)
+- **When uncertain, choose MAYBE over SKIP.** Better to check extra documents than miss the answer.
+
 ### PHASE 2: Deep Dive (Use `parse_file`)
 1. Use `parse_file` on documents marked RELEVANT
 2. In your **reason**, explain what key information you found
@@ -165,6 +175,12 @@ When you encounter a folder with documents:
 1. In your **reason**, explain: "Found cross-reference to [document] - need to backtrack"
 2. Use `preview_file` or `parse_file` to read the referenced document
 3. Continue this until all relevant cross-references are resolved
+
+**Backtracking Rules:**
+- **Maximum depth**: Follow at most 3 levels of cross-references per chain (A→B→C→D, then stop)
+- **No circular parsing**: If you've already parsed a document with `parse_file`, don't parse it again
+- **"Resolved" means**: You've extracted the referenced information OR confirmed the reference doesn't contain what you need
+- **When to stop backtracking**: You have the answer OR you've hit the depth limit OR all references lead to already-parsed documents
 
 **If you decide NOT to backtrack** despite finding a cross-reference:
 - Explain in your **reason**: "Found reference to [document] but sufficient information already gathered"
@@ -235,6 +251,23 @@ User asks: "What is the purchase price?"
    subject to working capital adjustments [Source: exhibits.pdf, Exhibit B]..."
 ```
 
+## Error Handling
+
+If a tool returns an error, recover gracefully:
+
+| Error Type | Recovery Action |
+|------------|-----------------|
+| "No such file or directory" | Check filename spelling, use `glob()` to find similar files |
+| "Unsupported file extension" | Try `read()` for plain text files, or skip if truly unsupported |
+| "Error parsing document" | File may be corrupted - try `preview_file()` instead, or skip |
+| "Permission denied" | Skip the file and note the limitation in your answer |
+| Multiple consecutive errors | Use `askhuman` to ask the user for guidance |
+
+**When encountering errors:**
+1. In your **reason**, acknowledge the error and explain your recovery strategy
+2. Try an alternative approach before giving up
+3. If you can't access a critical document, mention this limitation in your final answer
+
 ## Response Format
 
 You MUST respond with valid JSON in this exact format:
@@ -272,6 +305,7 @@ For final answer:
 # Agent Implementation
 # =============================================================================
 
+
 class FsExplorerAgent:
     """
     AI agent for exploring filesystems using ProxyPal/OpenAI-compatible API.
@@ -283,7 +317,12 @@ class FsExplorerAgent:
         token_usage: Tracks API call statistics and costs.
     """
 
-    def __init__(self, api_key: str | None = None, base_url: str | None = None, model: str | None = None) -> None:
+    def __init__(
+        self,
+        api_key: str | None = None,
+        base_url: str | None = None,
+        model: str | None = None,
+    ) -> None:
         """
         Initialize the agent with ProxyPal/OpenAI credentials.
 
@@ -398,7 +437,9 @@ class FsExplorerAgent:
                 return action, action.to_action_type()
             except Exception as e:
                 # If JSON parsing fails, log error (encode safely for Windows console)
-                safe_content = content[:500].encode('ascii', errors='replace').decode('ascii')
+                safe_content = (
+                    content[:500].encode("ascii", errors="replace").decode("ascii")
+                )
                 print(f"Warning: Failed to parse action JSON: {e}")
                 print(f"Response content: {safe_content}...")
                 return None
@@ -424,10 +465,9 @@ class FsExplorerAgent:
         # Track tool result sizes
         self.token_usage.add_tool_result(result, tool_name)
 
-        self._chat_history.append({
-            "role": "user",
-            "content": f"Tool result for {tool_name}:\n\n{result}"
-        })
+        self._chat_history.append(
+            {"role": "user", "content": f"Tool result for {tool_name}:\n\n{result}"}
+        )
 
     def reset(self) -> None:
         """Reset the agent's conversation history and token tracking."""
