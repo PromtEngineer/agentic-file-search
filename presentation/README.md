@@ -57,7 +57,36 @@ When ready to fork:
    git push -u origin presentation
    ```
 
-## Demo Files
+## Demo Scenario: TechCorp Event Planning
 
-- `README.md` - This file
-- (more to be added)
+**Query:** "Can we accommodate everyone's dietary needs at the venue?"
+
+**Data:** `data/event_demo/` (5 PDFs)
+- guest_list.pdf - 25 guests with dietary requirements
+- catering_menu.pdf - Menu options and pricing
+- venue_info.pdf - Venue catering capabilities
+- event_details.pdf - General event info
+- finance_approval.pdf - Budget constraints (the "eureka" document!)
+
+**Key Demo Moment:** Agent initially skips `finance_approval.pdf`, then backtracks when it discovers a cross-reference, revealing a critical budget constraint.
+
+## Documentation Files
+
+| File | Purpose |
+|------|---------|
+| `README.md` | This overview |
+| `SLIDE_CONTENT.md` | Slide content for the 3 demo slides |
+| `DEMO_EXPLANATION.md` | Detailed walkthrough of the three-phase strategy |
+| `PREP_NOTES.md` | Living document with setup, talking points, Q&A |
+| `UI_IMPROVEMENTS_TODO.md` | Tracks UI features and fixes |
+
+## Quick Start
+
+```bash
+# Start the web server
+uv run uvicorn fs_explorer.server:app --host 127.0.0.1 --port 8000
+
+# Open browser to http://127.0.0.1:8000
+# Set folder to: data/event_demo
+# Query: Can we accommodate everyone's dietary needs at the venue?
+```

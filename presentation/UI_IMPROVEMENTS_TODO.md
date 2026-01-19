@@ -69,14 +69,16 @@ The following features are **working**:
 
 ## Test Data
 
-- Folder: `./data/demo_project` (6 PDF files)
-- Query: "What are all the dependencies blocking Phase 2 launch?"
-- Note: Documents were originally .md files converted to .pdf, so cross-references mention ".md" extensions
+- Folder: `./data/event_demo` (5 PDF files)
+- Query: "Can we accommodate everyone's dietary needs at the venue?"
+- Scenario: TechCorp team building event for 25 employees
 
 ## Demo Notes
 
 For the DELL Romandie Day 2026 presentation:
 - The flag highlighting (RELEVANT/MAYBE/SKIP) is the key visual that shows the agent reasoning
 - Phase stepper shows the three-phase strategy clearly
-- Even without BACKTRACK badge, the execution log shows the agent parsing previously skipped documents
+- BACKTRACK badge appears when agent revisits `finance_approval.pdf`
+- **Eureka highlights** (orange) call attention to key discoveries: "cross-reference", "backtracking", "$0 available"
+- **Bold filenames** make document names easy to scan in execution log
 - The response with citation badges shows the final answer with sources

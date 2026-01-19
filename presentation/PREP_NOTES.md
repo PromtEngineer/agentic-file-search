@@ -87,32 +87,31 @@ uv run uvicorn fs_explorer.server:app --host 127.0.0.1 --port 8000
 # Open browser to http://127.0.0.1:8000
 ```
 
-### Demo Option 1: IT Project Documents (Recommended for IT audience)
+### Demo Option 1: Event Planning (Recommended for presentation)
 
-**Folder:** `data/demo_project/`
-**Documents:** 6 professional PDF documents (DataFlow Corp branding)
+**Folder:** `data/event_demo/`
+**Documents:** 5 professional PDF documents (TechCorp branding)
 
 | File | Purpose |
 |------|---------|
-| project_overview.pdf | Main project doc, references architecture and schedule |
-| architecture.pdf | Technical specs, references db_conventions, vendor_agreement, security_policy |
-| schedule.pdf | Timeline with Phase 2 dependencies, references vendor_agreement and security_policy |
-| db_conventions.pdf | Database standards, references security_policy |
-| vendor_agreement.pdf | StreamTech contract with delivery dates |
-| security_policy.pdf | Security requirements and Phase 2 sign-off checklist |
+| guest_list.pdf | 25 guests with dietary requirements |
+| catering_menu.pdf | Menu options and pricing, references finance_approval |
+| venue_info.pdf | Venue catering capabilities |
+| event_details.pdf | General event information |
+| finance_approval.pdf | Budget constraints (critical - initially skipped!) |
 
 **Query:**
 ```
-What are all the dependencies blocking Phase 2 launch?
+Can we accommodate everyone's dietary needs at the venue?
 ```
 
 **Why this query?**
-- IT audience relates to project management docs
-- Clear cross-references between documents
-- Agent must follow chains: schedule → vendor → security → db_conventions
-- Demonstrates backtracking when discovering references
+- Relatable scenario - everyone understands event planning
+- Clear backtracking moment: finance doc initially skipped, then discovered via cross-reference
+- Eureka moment: $0 budget for add-ons but nut-free costs $375
+- Shows real business impact of the agent's reasoning
 
-### Demo Option 2: Acquisition Documents (Original)
+### Demo Option 2: Acquisition Documents (Alternative)
 
 **Folder:** `data/test_acquisition/`
 
@@ -130,17 +129,24 @@ Look in data/test_acquisition/. What is the purchase price?
 
 1. **Phase 1: Navigate + Scan**
    - Agent navigates to the directory
-   - Uses `scan_folder` to preview ALL 11 documents in parallel
+   - Uses `scan_folder` to preview ALL 5 documents in parallel
    - Categorizes: RELEVANT / MAYBE / SKIP
+   - Note: `finance_approval.pdf` gets SKIP'd - seems unrelated to dietary needs
 
 2. **Phase 2: Deep Dive**
-   - Full extraction on relevant documents (acquisition_agreement, financial_adjustments)
+   - Full extraction on relevant documents (catering_menu, guest_list)
+   - Agent discovers cross-reference to finance document
    - Agent explains its reasoning at each step
 
-3. **Final Answer with Citations**
-   - Complete answer: Original $45M → Adjusted $43.33M
-   - Detailed breakdown with section citations
-   - Sources consulted list
+3. **Phase 3: Backtrack**
+   - Agent goes back to parse `finance_approval.pdf`
+   - Discovers the critical budget constraint
+   - BACKTRACK badge appears on the step
+
+4. **Final Answer with Citations**
+   - Which dietary needs CAN be accommodated (vegetarian, gluten-free)
+   - Which CANNOT due to budget (nut-free preparation)
+   - Clear recommendation for additional budget approval
 
 ### Tested Results (2026-01-16)
 
@@ -186,25 +192,27 @@ Look in data/test_acquisition/. What is the purchase price?
    - Stats bar at bottom
 
 4. **Demo Flow:**
-   - Click BROWSE → navigate to `data` → `test_acquisition` → SELECT THIS FOLDER
-   - Type query: "What is the purchase price?"
+   - Click BROWSE → navigate to `data` → `event_demo` → SELECT THIS FOLDER
+   - Type query: "Can we accommodate everyone's dietary needs at the venue?"
    - Click EXECUTE
    - Watch the execution log fill in real-time
 
 5. **What Audience Sees:**
-   - **Step #1: SCAN_FOLDER** - Agent explains it's scanning all documents
-   - **Step #2: PARSE_FILE** - Shows RELEVANT/MAYBE/SKIP categorization
-   - **Step #3: PARSE_FILE** - Agent follows cross-references
+   - **Step #1: SCAN_FOLDER** - Agent explains it's scanning all documents, categorizes them
+   - **Step #2: PARSE_FILE** - Deep dive into catering_menu, discovers cross-reference
+   - **Step #3: PARSE_FILE** - Parses guest_list, finds dietary requirements
+   - **Step #4: PARSE_FILE (BACKTRACK)** - Goes back to finance_approval.pdf
    - **RESPONSE** - Final answer with highlighted inline citations
    - **Stats bar** - Steps, scanned, parsed, API calls, tokens, cost
 
 ### Key Demo Moments
 
-1. **Categorization reasoning** - Agent explains why each doc is RELEVANT/MAYBE/SKIP
-2. **Cross-reference detection** - "I noticed cross-references to exhibits (B and C)"
-3. **Inline citations** - Every number has a `[Source: filename, Section]` tag
-4. **Sources Consulted** - Clean list at the end
-5. **Cost transparency** - ~$0.09 per query visible in stats
+1. **Categorization reasoning** - Agent explains why finance_approval is SKIP'd (not dietary-related)
+2. **Cross-reference detection** - "catering_menu references finance_approval for pricing impact"
+3. **Backtrack moment** - Agent goes back to the SKIP'd document
+4. **Eureka highlight** - "$0 available" appears in orange, showing the budget constraint
+5. **Bold filenames** - All document names are bold for easy scanning
+6. **Cost transparency** - ~$0.10 per query visible in stats
 
 ---
 

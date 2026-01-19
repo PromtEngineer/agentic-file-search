@@ -80,14 +80,30 @@ Requires `PROXYPAL_API_KEY` environment variable (set in `.env` file). Uses Clau
 
 - `data/test_acquisition/` - 10 interconnected legal documents
 - `data/large_acquisition/` - 25 documents with cross-references
-- `data/demo_project/` - 6 IT project documents for DELL Romandie Day 2026 demo
+- `data/event_demo/` - 5 event planning documents for DELL Romandie Day 2026 demo
 
 ## DELL Romandie Day 2026 Presentation
 
 Materials in `presentation/material/`:
-- `MS_Presentation-DELL Romandie Day 2026_v1.pdf` - Main presentation (needs new slides for the demo)
+- `MS_Presentation-DELL Romandie Day 2026_v1.pdf` - Main presentation
 - `YT-This is the new RAG-Transcritption.txt` - YouTube transcript from original demo author explaining the agentic approach
 
-Demo query: "What are all the dependencies blocking Phase 2 launch?"
+### Demo Scenario
+
+**Folder:** `data/event_demo/` (5 PDF documents)
+**Query:** "Can we accommodate everyone's dietary needs at the venue?"
+
+**Scenario:** TechCorp is planning a team building event for 25 employees. The agent must determine if all dietary needs can be accommodated within budget.
+
+**Documents:**
+| File | Purpose | Agent Category |
+|------|---------|----------------|
+| guest_list.pdf | 25 guests with dietary requirements | RELEVANT |
+| catering_menu.pdf | Menu options and pricing | RELEVANT |
+| venue_info.pdf | Venue catering capabilities | MAYBE |
+| event_details.pdf | General event info | SKIP |
+| finance_approval.pdf | Budget constraints (critical!) | SKIP → BACKTRACK |
+
+**Key Demo Moment:** Agent initially skips `finance_approval.pdf` but backtracks when it discovers a cross-reference about nut-free pricing. The "eureka" moment: budget is $1,125 with $0 available for add-ons, but nut-free preparation costs $375.
 
 Slide content outline in `presentation/SLIDE_CONTENT.md`

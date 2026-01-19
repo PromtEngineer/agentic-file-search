@@ -92,29 +92,29 @@
 ## LIVE DEMO
 
 ### Introduction (10 seconds)
-"6 IT project documents - the kind you deal with every day. One question about project dependencies."
+"5 event planning documents - TechCorp is organizing a team building event for 25 employees. Can they accommodate everyone's dietary needs?"
 
 ### Query
 ```
-What are all the dependencies blocking Phase 2 launch?
+Can we accommodate everyone's dietary needs at the venue?
 ```
 
 ### What to Point Out
 
 | Step | What Happens | Say This |
 |------|--------------|----------|
-| **Scan** | Previews all 6 PDFs | "Categorizing: RELEVANT, MAYBE, SKIP - it identified schedule.pdf as key" |
-| **Deep Dive** | Reads schedule.pdf | "Found Phase 2 dependencies... sees references to vendor_agreement and security_policy" |
-| **Backtrack** | Goes to vendor_agreement.pdf | "Following the cross-reference - checking delivery dates" |
-| **Backtrack** | Goes to security_policy.pdf | "Another reference - checking security sign-off requirements" |
-| **Answer** | Complete dependency list with dates and owners | "Connected 4 documents. Every fact has a source." |
+| **Scan** | Previews all 5 PDFs | "Categorizing: guest_list and catering_menu are RELEVANT, venue is MAYBE, finance_approval is SKIP - seems unrelated to dietary needs" |
+| **Deep Dive** | Reads catering_menu.pdf | "Found dietary options: vegetarian included, vegan +$5, gluten-free included, nut-free +$15/person..." |
+| **Deep Dive** | Reads guest_list.pdf | "Found critical info: 1 guest with SEVERE nut allergy requiring nut-free preparation for entire event" |
+| **Backtrack** | Goes to finance_approval.pdf | "Wait - the catering menu referenced finance_approval for pricing impact. Going back to check budget..." |
+| **Eureka** | Discovers budget constraint | "Budget is $1,125 with $0 available for add-ons. Nut-free costs $375. **Problem discovered!**" |
 
 ### Expected Answer (Summary)
 The agent should find:
-1. **Vendor Delivery** - StreamTech module due Jan 25, 2026 (from vendor_agreement.pdf)
-2. **Security Sign-off** - Penetration tests, API review, James Morton approval (from security_policy.pdf)
-3. **Database Readiness** - Schemas must comply with db_conventions.pdf
-4. **Phase 1 Completion** - All batch pipelines operational (from schedule.pdf)
+1. **Can accommodate**: 3 vegetarian, 1 gluten-free (included in base price)
+2. **Budget issue**: 2 vegan guests (+$10 total) and 1 severe nut allergy (+$375) exceed $0 add-on budget
+3. **Critical finding**: Tom Rodriguez's nut allergy requires nut-free prep for ALL 25 guests at $15/person = $375
+4. **Recommendation**: Need finance approval for additional $385 or find alternative catering
 
 ### Closing Line
 "RAG retrieves. Agents reason. That's the evolution."
@@ -125,7 +125,7 @@ The agent should find:
 
 | Metric | Value |
 |--------|-------|
-| Documents | 6 |
+| Documents | 5 |
 | Fully parsed | 3-4 |
 | Steps | 4-5 |
 | Cost | ~$0.10 |
