@@ -465,6 +465,12 @@
             content: '🔗 ';
         }
 
+        /* Eureka moment highlighting */
+        .eureka-keyword {
+            color: #d68910;
+            font-weight: 600;
+        }
+
         .step-header {
             display: flex;
             justify-content: space-between;
@@ -1951,13 +1957,1215 @@
             color: #1a1a1a;
             border-color: #f4f1eb;
         }
+
+        /* ==================== INTRO SCREEN ==================== */
+
+        .intro-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 1000;
+            overflow: hidden;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .intro-screen.hidden {
+            opacity: 0;
+            transform: translateY(-100%);
+            pointer-events: none;
+        }
+
+        .intro-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 80px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Intro Header */
+        .intro-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 30px;
+            border-bottom: 2px solid var(--ink);
+            margin-bottom: 40px;
+        }
+
+        .intro-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 48px;
+            font-weight: 400;
+            letter-spacing: -1px;
+        }
+
+        .intro-skip {
+            background: transparent;
+            border: 1px solid var(--ink-muted);
+            padding: 10px 20px;
+            font-family: inherit;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            color: var(--ink-muted);
+            transition: all 0.2s;
+        }
+
+        .intro-skip:hover {
+            background: var(--ink);
+            color: var(--bg);
+            border-color: var(--ink);
+        }
+
+        /* Intro Sections Container */
+        .intro-sections {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .intro-section {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            transform: translateX(60px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            pointer-events: none;
+            padding: 20px 0;
+        }
+
+        .intro-section.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        .intro-section.prev {
+            opacity: 0;
+            transform: translateX(-60px);
+        }
+
+        /* Section Headlines */
+        .intro-headline {
+            font-family: 'Instrument Serif', serif;
+            font-size: 56px;
+            font-weight: 400;
+            line-height: 1.1;
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s;
+        }
+
+        .intro-section.active .intro-headline {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .intro-headline .accent {
+            color: var(--accent);
+        }
+
+        /* Section Subtext */
+        .intro-subtext {
+            font-size: 18px;
+            color: var(--ink-light);
+            line-height: 1.7;
+            max-width: 700px;
+            margin-bottom: 40px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s;
+        }
+
+        .intro-section.active .intro-subtext {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Quote Block */
+        .intro-quote {
+            font-family: 'Instrument Serif', serif;
+            font-size: 28px;
+            font-style: italic;
+            color: var(--ink);
+            border-left: 4px solid var(--accent);
+            padding-left: 24px;
+            margin: 30px 0;
+            max-width: 700px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
+        }
+
+        .intro-section.active .intro-quote {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Bullet Points */
+        .intro-bullets {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            max-width: 700px;
+        }
+
+        .intro-bullets li {
+            font-size: 16px;
+            color: var(--ink-light);
+            padding: 12px 0 12px 30px;
+            position: relative;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .intro-bullets li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .intro-section.active .intro-bullets li {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .intro-section.active .intro-bullets li:nth-child(1) { transition-delay: 0.3s; }
+        .intro-section.active .intro-bullets li:nth-child(2) { transition-delay: 0.4s; }
+        .intro-section.active .intro-bullets li:nth-child(3) { transition-delay: 0.5s; }
+        .intro-section.active .intro-bullets li:nth-child(4) { transition-delay: 0.6s; }
+        .intro-section.active .intro-bullets li:nth-child(5) { transition-delay: 0.7s; }
+
+        /* RAG Pipeline Diagram */
+        .rag-pipeline {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .pipeline-box {
+            background: var(--bg-alt);
+            border: 2px solid var(--border);
+            padding: 16px 24px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.3s;
+        }
+
+        .pipeline-arrow {
+            font-size: 24px;
+            color: var(--border);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .intro-section.active .pipeline-box,
+        .intro-section.active .pipeline-arrow {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .intro-section.active .pipeline-box:nth-child(1) { transition-delay: 0.3s; }
+        .intro-section.active .pipeline-arrow:nth-child(2) { transition-delay: 0.4s; }
+        .intro-section.active .pipeline-box:nth-child(3) { transition-delay: 0.5s; }
+        .intro-section.active .pipeline-arrow:nth-child(4) { transition-delay: 0.6s; }
+        .intro-section.active .pipeline-box:nth-child(5) { transition-delay: 0.7s; }
+        .intro-section.active .pipeline-arrow:nth-child(6) { transition-delay: 0.8s; }
+        .intro-section.active .pipeline-box:nth-child(7) { transition-delay: 0.9s; }
+        .intro-section.active .pipeline-arrow:nth-child(8) { transition-delay: 1.0s; }
+        .intro-section.active .pipeline-box:nth-child(9) { transition-delay: 1.1s; }
+
+        .pipeline-box.broken {
+            border-color: var(--accent);
+            position: relative;
+        }
+
+        .pipeline-box.broken::after {
+            content: '✗';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--accent);
+            color: white;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            animation: shake 0.5s ease 1.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+
+        /* Pipeline box highlight state (for sequential animation) */
+        .pipeline-box.highlight {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, var(--accent-light) 0%, #fff8f5 100%);
+            box-shadow: 0 0 20px rgba(196, 93, 58, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* Bullet point highlight state */
+        .intro-bullets li.highlight {
+            color: var(--accent);
+            transform: translateX(8px);
+        }
+
+        .intro-bullets li.highlight strong {
+            color: var(--accent);
+        }
+
+        /* Ensure smooth transitions for highlight effect */
+        .pipeline-box {
+            transition: opacity 0.4s ease, transform 0.4s ease,
+                        border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .intro-bullets li {
+            transition: opacity 0.4s ease, transform 0.3s ease, color 0.3s ease;
+        }
+
+        /* Pipeline Illustration Container - positioned below pipeline */
+        .pipeline-illustration {
+            position: relative;
+            height: 90px;
+            margin: 0;
+        }
+
+        /* Individual illustration steps - absolutely positioned, JS sets left */
+        .illust-step {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transform: translateY(-5px) translateX(-50%); /* Center on calculated position */
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+            top: 0;
+        }
+
+        /* Spacer no longer needed */
+        .illust-spacer {
+            display: none;
+        }
+
+        /* Active illustration */
+        .illust-step.active {
+            opacity: 1;
+            transform: translateY(0) translateX(-50%);
+        }
+
+        .illust-label {
+            font-size: 13px;
+            color: var(--ink-muted);
+            font-style: italic;
+        }
+
+        /* Pipeline controls for manual stepping */
+        .pipeline-controls {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .pipeline-ctrl {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--ink-muted);
+            transition: all 0.2s ease;
+            min-width: 36px;
+        }
+        .pipeline-ctrl:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        .pipeline-ctrl:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .pipeline-ctrl:disabled:hover {
+            background: var(--bg-alt);
+            color: var(--ink-muted);
+            border-color: var(--border);
+        }
+        .pipeline-ctrl.playing {
+            background: var(--accent-light);
+            border-color: var(--accent);
+        }
+
+        /* === Documents illustration === */
+        .doc-stack {
+            display: flex;
+            gap: -8px;
+            position: relative;
+        }
+        .doc-stack .doc {
+            width: 30px;
+            height: 38px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 2px;
+            position: relative;
+            margin-left: -12px;
+            box-shadow: 2px 2px 4px var(--shadow);
+        }
+        .doc-stack .doc:first-child { margin-left: 0; }
+        .doc-stack .doc::before {
+            content: '';
+            position: absolute;
+            top: 8px; left: 4px; right: 4px;
+            height: 2px;
+            background: var(--border);
+        }
+        .doc-stack .doc::after {
+            content: '';
+            position: absolute;
+            top: 14px; left: 4px; right: 8px;
+            height: 2px;
+            background: var(--border);
+        }
+
+        /* === Chunks illustration === */
+        .chunk-animation {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transform: scale(0.85);
+        }
+        .chunk-animation .big-doc {
+            width: 28px;
+            height: 36px;
+            background: white;
+            border: 2px solid var(--accent);
+            border-radius: 2px;
+        }
+        .small-chunks {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .chunk {
+            width: 22px;
+            height: 10px;
+            background: var(--accent-light);
+            border: 1px solid var(--accent);
+            border-radius: 2px;
+        }
+        .chunk-animation .arrow {
+            color: var(--accent);
+            font-size: 16px;
+        }
+
+        /* === Embeddings illustration === */
+        .embed-animation {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'IBM Plex Mono', monospace;
+            transform: scale(0.85);
+        }
+        .text-sample {
+            padding: 4px 6px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .vector {
+            padding: 4px 6px;
+            background: var(--accent-light);
+            border: 2px solid var(--accent);
+            border-radius: 4px;
+            font-size: 10px;
+            color: var(--accent);
+        }
+        .embed-animation .arrow {
+            color: var(--accent);
+            font-size: 16px;
+        }
+
+        /* === Vector DB illustration - Similarity Web === */
+        .vector-web {
+            position: relative;
+            width: 60px;
+            height: 50px;
+        }
+        .vector-web svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .vector-web .web-line {
+            stroke: var(--border);
+            stroke-width: 1.5;
+            fill: none;
+            opacity: 0.3;
+            transition: opacity 0.3s ease, stroke 0.3s ease;
+        }
+        .vector-web .web-dot {
+            fill: var(--accent);
+            opacity: 0.5;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        /* Animate when active */
+        .illust-vectordb.active .web-line {
+            stroke: var(--accent);
+            opacity: 0.6;
+            animation: linePulse 1.5s ease-in-out infinite;
+        }
+        .illust-vectordb.active .web-dot {
+            opacity: 1;
+        }
+        .illust-vectordb.active .web-dot.highlight {
+            animation: dotGlow 1.5s ease-in-out infinite;
+        }
+        @keyframes linePulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+        @keyframes dotGlow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        /* === LLM illustration === */
+        .llm-icon {
+            font-size: 36px;
+            animation: none;
+        }
+        .illust-llm.active .llm-icon {
+            animation: pulse 1s ease infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Three Phase Diagram */
+        .phase-diagram {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .phase-box {
+            background: var(--bg);
+            border: 3px solid var(--border);
+            border-radius: 12px;
+            padding: 24px 32px;
+            min-width: 160px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.5s ease;
+        }
+
+        .phase-box-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--border);
+            color: var(--ink-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 18px;
+            font-weight: 700;
+            transition: all 0.4s ease;
+        }
+
+        .phase-box-label {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .phase-box-desc {
+            font-size: 12px;
+            color: var(--ink-muted);
+            margin-top: 8px;
+        }
+
+        .intro-section.active .phase-box {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .intro-section.active .phase-box:nth-child(1) { transition-delay: 0.3s; }
+        .intro-section.active .phase-arrow-big:nth-child(2) { transition-delay: 0.5s; }
+        .intro-section.active .phase-box:nth-child(3) { transition-delay: 0.7s; }
+        .intro-section.active .phase-arrow-big:nth-child(4) { transition-delay: 0.9s; }
+        .intro-section.active .phase-box:nth-child(5) { transition-delay: 1.1s; }
+
+        .phase-box.highlighted {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, var(--accent-light) 0%, #fff8f5 100%);
+        }
+
+        .phase-box.highlighted .phase-box-number {
+            background: var(--accent);
+            color: white;
+        }
+
+        .phase-arrow-big {
+            font-size: 32px;
+            color: var(--border);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .intro-section.active .phase-arrow-big {
+            opacity: 1;
+        }
+
+        /* Backtrack Arrow */
+        .backtrack-container {
+            position: relative;
+            width: 100%;
+            margin-top: 20px;
+            height: 60px;
+            opacity: 0;
+            transition: opacity 0.6s ease 1.4s;
+        }
+
+        .intro-section.active .backtrack-container {
+            opacity: 1;
+        }
+
+        .backtrack-arrow {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .backtrack-line {
+            width: 400px;
+            height: 3px;
+            background: var(--accent);
+            position: relative;
+        }
+
+        .backtrack-line::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: -6px;
+            border: 8px solid transparent;
+            border-right-color: var(--accent);
+        }
+
+        .backtrack-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        /* Comparison Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 30px 0;
+            max-width: 900px;
+        }
+
+        .comparison-col {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .intro-section.active .comparison-col:nth-child(1) { transition-delay: 0.3s; }
+        .intro-section.active .comparison-col:nth-child(2) { transition-delay: 0.5s; }
+
+        .intro-section.active .comparison-col {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .comparison-col.faded {
+            opacity: 0.4;
+        }
+
+        .comparison-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .comparison-title .status {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .comparison-title .status.old {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .comparison-title .status.new {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .comparison-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .comparison-list li {
+            padding: 10px 0;
+            font-size: 15px;
+            color: var(--ink-light);
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Demo Preview */
+        .demo-preview {
+            background: var(--bg-alt);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 30px 40px;
+            margin: 30px 0;
+            max-width: 700px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
+        }
+
+        .intro-section.active .demo-preview {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .demo-query,
+        .demo-docs,
+        .demo-challenge {
+            margin-bottom: 16px;
+        }
+
+        .demo-label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--ink-muted);
+            margin-bottom: 8px;
+        }
+
+        .demo-query .demo-text {
+            font-family: 'Instrument Serif', serif;
+            font-size: 22px;
+            font-style: italic;
+            color: var(--ink);
+        }
+
+        .demo-doc-list {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--ink-light);
+        }
+
+        .demo-challenge {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .demo-challenge .demo-text {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        /* Start Demo Button */
+        .start-demo-btn {
+            background: var(--ink);
+            color: var(--bg);
+            border: none;
+            padding: 20px 48px;
+            font-family: inherit;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease 0.5s, transform 0.6s ease 0.5s, background 0.2s;
+        }
+
+        .intro-section.active .start-demo-btn {
+            opacity: 1;
+            transform: translateY(0);
+            animation: subtle-pulse 2s ease-in-out infinite 1s;
+        }
+
+        @keyframes subtle-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(196, 93, 58, 0); }
+            50% { box-shadow: 0 0 20px 5px rgba(196, 93, 58, 0.3); }
+        }
+
+        .start-demo-btn:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .start-demo-btn::after {
+            content: ' →';
+        }
+
+        /* Intro Navigation */
+        .intro-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+        }
+
+        .intro-nav-dots {
+            display: flex;
+            gap: 12px;
+        }
+
+        .intro-nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .intro-nav-dot:hover {
+            background: var(--ink-muted);
+        }
+
+        .intro-nav-dot.active {
+            background: var(--accent);
+            transform: scale(1.2);
+        }
+
+        .intro-nav-arrows {
+            display: flex;
+            gap: 12px;
+        }
+
+        .intro-nav-btn {
+            background: transparent;
+            border: 2px solid var(--ink);
+            width: 48px;
+            height: 48px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .intro-nav-btn:hover:not(:disabled) {
+            background: var(--ink);
+            color: var(--bg);
+        }
+
+        .intro-nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .intro-nav-hint {
+            font-size: 12px;
+            color: var(--ink-muted);
+        }
+
+        .intro-nav-hint kbd {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-family: inherit;
+            margin: 0 4px;
+        }
+
+        /* Home Button in Header */
+        .home-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-right: 16px;
+        }
+
+        .home-btn:hover {
+            background: var(--ink);
+            color: var(--bg);
+            border-color: var(--ink);
+        }
+
+        /* App container */
+        #app {
+            transition: opacity 0.5s ease;
+        }
+
+        #app.hidden {
+            display: none;
+        }
+
+        #app.fade-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="page">
+    <!-- ==================== INTRO SCREEN ==================== -->
+    <div id="intro-screen" class="intro-screen">
+        <div class="intro-container">
+            <!-- Intro Header -->
+            <header class="intro-header">
+                <h1 class="intro-title">fs-explorer</h1>
+                <button class="intro-skip" onclick="skipToDemo()">Skip Intro <kbd>Esc</kbd></button>
+            </header>
+
+            <!-- Intro Sections -->
+            <div class="intro-sections">
+                <!-- Section 1: What is RAG? -->
+                <div class="intro-section active" data-section="1">
+                    <h2 class="intro-headline">What is <span class="accent">RAG</span>?</h2>
+                    <p class="intro-subtext">
+                        <strong>Retrieval-Augmented Generation</strong> — the standard approach for
+                        making LLMs answer questions about your documents.
+                    </p>
+
+                    <div class="rag-pipeline">
+                        <div class="pipeline-box">Documents</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-box">Chunks</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-box">Embeddings</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-box">Vector DB</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-box">LLM</div>
+                    </div>
+
+                    <div class="pipeline-illustration">
+                        <div class="illust-step illust-documents">
+                            <div class="doc-stack">
+                                <div class="doc"></div>
+                                <div class="doc"></div>
+                                <div class="doc"></div>
+                            </div>
+                            <span class="illust-label">Your documents</span>
+                        </div>
+                        <div class="illust-spacer"></div>
+                        <div class="illust-step illust-chunks">
+                            <div class="chunk-animation">
+                                <div class="big-doc"></div>
+                                <div class="arrow">→</div>
+                                <div class="small-chunks">
+                                    <div class="chunk"></div>
+                                    <div class="chunk"></div>
+                                    <div class="chunk"></div>
+                                </div>
+                            </div>
+                            <span class="illust-label">Split into pieces</span>
+                        </div>
+                        <div class="illust-spacer"></div>
+                        <div class="illust-step illust-embeddings">
+                            <div class="embed-animation">
+                                <span class="text-sample">"hello"</span>
+                                <div class="arrow">→</div>
+                                <span class="vector">[0.2, 0.8]</span>
+                            </div>
+                            <span class="illust-label">Semantic vectors</span>
+                        </div>
+                        <div class="illust-spacer"></div>
+                        <div class="illust-step illust-vectordb">
+                            <div class="vector-web">
+                                <svg viewBox="0 0 60 50">
+                                    <!-- Connection lines -->
+                                    <line class="web-line" x1="30" y1="8" x2="10" y2="25"/>
+                                    <line class="web-line" x1="30" y1="8" x2="50" y2="25"/>
+                                    <line class="web-line" x1="30" y1="8" x2="30" y2="42"/>
+                                    <line class="web-line" x1="10" y1="25" x2="30" y2="42"/>
+                                    <line class="web-line" x1="50" y1="25" x2="30" y2="42"/>
+                                    <line class="web-line" x1="10" y1="25" x2="50" y2="25"/>
+                                    <!-- Nodes -->
+                                    <circle class="web-dot" cx="30" cy="8" r="5"/>
+                                    <circle class="web-dot" cx="10" cy="25" r="5"/>
+                                    <circle class="web-dot highlight" cx="50" cy="25" r="5"/>
+                                    <circle class="web-dot" cx="30" cy="42" r="5"/>
+                                </svg>
+                            </div>
+                            <span class="illust-label">Similar vectors</span>
+                        </div>
+                        <div class="illust-spacer"></div>
+                        <div class="illust-step illust-llm">
+                            <div class="llm-icon">🧠✨</div>
+                            <span class="illust-label">Generate answer</span>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-controls">
+                        <button class="pipeline-ctrl" id="ragPrevBtn" title="Previous step (Ctrl+←)">‹</button>
+                        <button class="pipeline-ctrl playing" id="ragPlayPauseBtn" title="Pause/Play (Ctrl+Space)">⏸</button>
+                        <button class="pipeline-ctrl" id="ragNextBtn" title="Next step (Ctrl+→)">›</button>
+                    </div>
+
+                    <ul class="intro-bullets">
+                        <li><strong>Split</strong> documents into small chunks</li>
+                        <li><strong>Embed</strong> chunks as vectors (semantic fingerprints)</li>
+                        <li><strong>Store</strong> in a vector database</li>
+                        <li><strong>Retrieve</strong> similar chunks when user asks a question</li>
+                        <li><strong>Generate</strong> answer using retrieved context</li>
+                    </ul>
+                </div>
+
+                <!-- Section 2: The Problem with RAG -->
+                <div class="intro-section" data-section="2">
+                    <h2 class="intro-headline">The Problem with <span class="accent">RAG</span></h2>
+                    <p class="intro-subtext">
+                        RAG works for simple cases. But it has fundamental limitations
+                        that become painfully obvious with complex, interconnected documents.
+                    </p>
+
+                    <div class="rag-pipeline">
+                        <div class="pipeline-box">Documents</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-box">Chunks</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-box broken">Embeddings</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-box">Vector DB</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-box">LLM</div>
+                    </div>
+
+                    <ul class="intro-bullets">
+                        <li><strong>Semantic similarity ≠ relevance</strong> — chunks match keywords, not meaning</li>
+                        <li><strong>Lost context</strong> — document structure and cross-references are destroyed</li>
+                        <li><strong>No reasoning</strong> — can't follow chains of logic across documents</li>
+                        <li><strong>Brittle retrieval</strong> — miss critical info that doesn't "look similar"</li>
+                    </ul>
+
+                    <blockquote class="intro-quote">
+                        "RAG is pattern matching. It doesn't understand your documents."
+                    </blockquote>
+                </div>
+
+                <!-- Section 3: The Paradigm Shift -->
+                <div class="intro-section" data-section="3">
+                    <h2 class="intro-headline">The <span class="accent">Paradigm Shift</span></h2>
+                    <p class="intro-subtext">
+                        What if AI could navigate documents like a human researcher would?
+                        Scanning overviews, diving deep into relevant sections, following cross-references.
+                    </p>
+
+                    <div class="comparison-grid">
+                        <div class="comparison-col faded">
+                            <h3 class="comparison-title">
+                                RAG
+                                <span class="status old">Yesterday</span>
+                            </h3>
+                            <ul class="comparison-list">
+                                <li>Pre-computed embeddings</li>
+                                <li>Static chunk retrieval</li>
+                                <li>Hope the right chunks match</li>
+                                <li>No understanding of structure</li>
+                                <li>Can't follow references</li>
+                            </ul>
+                        </div>
+                        <div class="comparison-col">
+                            <h3 class="comparison-title">
+                                Agentic AI
+                                <span class="status new">Today</span>
+                            </h3>
+                            <ul class="comparison-list">
+                                <li>Real-time document analysis</li>
+                                <li>Dynamic navigation decisions</li>
+                                <li>Genuine reasoning about relevance</li>
+                                <li>Preserves document structure</li>
+                                <li>Follows cross-references intelligently</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <blockquote class="intro-quote">
+                        "Why now? Frontier models finally have the reasoning capability to navigate autonomously."
+                    </blockquote>
+                </div>
+
+                <!-- Section 4: The Three-Phase Strategy -->
+                <div class="intro-section" data-section="4">
+                    <h2 class="intro-headline">The <span class="accent">Three-Phase</span> Strategy</h2>
+                    <p class="intro-subtext">
+                        Instead of pre-computing and hoping, the agent explores your documents in real-time
+                        with a deliberate three-phase strategy.
+                    </p>
+
+                    <div class="phase-diagram">
+                        <div class="phase-box">
+                            <div class="phase-box-number">1</div>
+                            <div class="phase-box-label">Scan</div>
+                            <div class="phase-box-desc">Preview all documents</div>
+                        </div>
+                        <span class="phase-arrow-big">→</span>
+                        <div class="phase-box">
+                            <div class="phase-box-number">2</div>
+                            <div class="phase-box-label">Deep Dive</div>
+                            <div class="phase-box-desc">Parse relevant files</div>
+                        </div>
+                        <span class="phase-arrow-big">→</span>
+                        <div class="phase-box highlighted">
+                            <div class="phase-box-number">3</div>
+                            <div class="phase-box-label">Backtrack</div>
+                            <div class="phase-box-desc">Follow cross-references</div>
+                        </div>
+                    </div>
+
+                    <div class="backtrack-container">
+                        <div class="backtrack-arrow">
+                            <div class="backtrack-line"></div>
+                            <span class="backtrack-label">The Key Insight: Autonomous Backtracking</span>
+                        </div>
+                    </div>
+
+                    <ul class="intro-bullets">
+                        <li><strong>Parallel scanning</strong> — concurrently preview all documents for triage</li>
+                        <li><strong>Intelligent deep dive</strong> — full parsing only where it matters</li>
+                        <li><strong>Cross-reference discovery</strong> — documents mention other documents? Go back and read them.</li>
+                    </ul>
+                </div>
+
+                <!-- Section 5: See It In Action -->
+                <div class="intro-section" data-section="5">
+                    <h2 class="intro-headline">See It <span class="accent">In Action</span></h2>
+
+                    <p class="intro-subtext">
+                        <strong>Scenario:</strong> TechCorp is planning a team building event for 25 employees.
+                        The agent must determine if all dietary needs can be accommodated within budget.
+                    </p>
+
+                    <div class="demo-preview">
+                        <div class="demo-query">
+                            <span class="demo-label">Demo Query</span>
+                            <span class="demo-text">"Can we accommodate everyone's dietary needs at the venue?"</span>
+                        </div>
+                        <div class="demo-docs">
+                            <span class="demo-label">5 Documents</span>
+                            <span class="demo-doc-list">guest_list.pdf, catering_menu.pdf, venue_info.pdf, event_details.pdf, finance_approval.pdf</span>
+                        </div>
+                        <div class="demo-challenge">
+                            <span class="demo-label">The Challenge</span>
+                            <span class="demo-text">Critical budget info is hidden in a document the agent initially skips...</span>
+                        </div>
+                    </div>
+
+                    <ul class="intro-bullets">
+                        <li>Watch the agent scan and categorize all documents</li>
+                        <li>See it identify relevant files and deep-dive into them</li>
+                        <li>Observe the <strong>backtrack phase</strong> when it discovers cross-references</li>
+                    </ul>
+
+                    <button class="start-demo-btn" onclick="startDemo()">Start Demo</button>
+                </div>
+            </div>
+
+            <!-- Intro Navigation -->
+            <nav class="intro-nav">
+                <div class="intro-nav-hint">
+                    <kbd>←</kbd> <kbd>→</kbd> or <kbd>Space</kbd> to navigate
+                </div>
+                <div class="intro-nav-dots">
+                    <div class="intro-nav-dot active" onclick="goToSection(1)"></div>
+                    <div class="intro-nav-dot" onclick="goToSection(2)"></div>
+                    <div class="intro-nav-dot" onclick="goToSection(3)"></div>
+                    <div class="intro-nav-dot" onclick="goToSection(4)"></div>
+                    <div class="intro-nav-dot" onclick="goToSection(5)"></div>
+                </div>
+                <div class="intro-nav-arrows">
+                    <button class="intro-nav-btn" id="introPrevBtn" onclick="prevSection()" disabled>←</button>
+                    <button class="intro-nav-btn" id="introNextBtn" onclick="nextSection()">→</button>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN APP ==================== -->
+    <div class="page hidden" id="app">
         <!-- Masthead -->
         <header class="masthead">
             <div class="title-block">
+                <button class="home-btn" onclick="showIntro()" title="Return to intro (H)">
+                    <span>⌂</span>
+                    <span>Intro</span>
+                </button>
                 <h1 class="site-title">fs-explorer</h1>
                 <span class="version">v0.1.0</span>
             </div>
@@ -2165,6 +3373,7 @@
         <kbd>F</kbd> Fullscreen
         <kbd>R</kbd> Restart
         <kbd>S</kbd> Recordings
+        <kbd>H</kbd> Intro
         <kbd>?</kbd> Help
     </div>
 
@@ -2188,6 +3397,353 @@
         let isReplayMode = false;
         let currentRecording = [];  // Messages being recorded
         let lastQuery = '';  // Track query for recording
+
+        // ==================== INTRO SCREEN STATE ====================
+        let currentIntroSection = 1;
+        const totalIntroSections = 5;
+        let isIntroVisible = true;
+
+        // RAG Pipeline Animation State
+        let ragAnimationInterval = null;
+        let currentHighlightStep = 0;
+        let ragAnimationPaused = false;
+        let ragPipelineBoxes = null;
+        let ragBullets = null;
+        const RAG_STEP_COUNT = 5;
+
+        // Highlight a specific step in the RAG pipeline (module-scope function)
+        function highlightRagStep(step) {
+            const section1 = document.querySelector('[data-section="1"]');
+            if (!section1) return;
+
+            // Cache elements if not already cached
+            if (!ragPipelineBoxes) {
+                ragPipelineBoxes = section1.querySelectorAll('.pipeline-box');
+                ragBullets = section1.querySelectorAll('.intro-bullets li');
+            }
+
+            // Clear all highlights
+            ragPipelineBoxes.forEach(box => box.classList.remove('highlight'));
+            ragBullets.forEach(bullet => bullet.classList.remove('highlight'));
+
+            // Apply highlight to current step
+            if (step < ragPipelineBoxes.length) {
+                ragPipelineBoxes[step].classList.add('highlight');
+                if (step < ragBullets.length) {
+                    ragBullets[step].classList.add('highlight');
+                }
+            }
+
+            // Update illustrations with dynamic positioning
+            const illustrations = section1.querySelectorAll('.illust-step');
+            const illustContainer = section1.querySelector('.pipeline-illustration');
+            const containerRect = illustContainer.getBoundingClientRect();
+
+            illustrations.forEach((illust, index) => {
+                const isActive = index === step;
+                illust.classList.toggle('active', isActive);
+
+                // Position illustration centered below its corresponding box
+                if (index < ragPipelineBoxes.length) {
+                    const boxRect = ragPipelineBoxes[index].getBoundingClientRect();
+                    const boxCenterX = boxRect.left + boxRect.width / 2;
+                    const relativeLeft = boxCenterX - containerRect.left;
+                    illust.style.left = relativeLeft + 'px';
+                }
+            });
+        }
+
+        // Update RAG control buttons UI
+        function updateRagControlsUI() {
+            const playPauseBtn = document.getElementById('ragPlayPauseBtn');
+            if (playPauseBtn) {
+                playPauseBtn.textContent = ragAnimationPaused ? '▶' : '⏸';
+                playPauseBtn.classList.toggle('playing', !ragAnimationPaused);
+                playPauseBtn.title = ragAnimationPaused ? 'Play (Ctrl+Space)' : 'Pause (Ctrl+Space)';
+            }
+        }
+
+        // Toggle RAG animation play/pause
+        function toggleRagAnimation() {
+            ragAnimationPaused = !ragAnimationPaused;
+            updateRagControlsUI();
+
+            if (!ragAnimationPaused && !ragAnimationInterval) {
+                // Resume: restart the interval
+                startRagAnimationInterval();
+            } else if (ragAnimationPaused && ragAnimationInterval) {
+                // Pause: stop the interval but keep current step
+                clearInterval(ragAnimationInterval);
+                ragAnimationInterval = null;
+            }
+        }
+
+        // Go to previous RAG step (pauses animation)
+        function ragPrevStep() {
+            if (!ragAnimationPaused) {
+                ragAnimationPaused = true;
+                if (ragAnimationInterval) {
+                    clearInterval(ragAnimationInterval);
+                    ragAnimationInterval = null;
+                }
+            }
+            currentHighlightStep = (currentHighlightStep - 1 + RAG_STEP_COUNT) % RAG_STEP_COUNT;
+            highlightRagStep(currentHighlightStep);
+            updateRagControlsUI();
+        }
+
+        // Go to next RAG step (pauses animation)
+        function ragNextStep() {
+            if (!ragAnimationPaused) {
+                ragAnimationPaused = true;
+                if (ragAnimationInterval) {
+                    clearInterval(ragAnimationInterval);
+                    ragAnimationInterval = null;
+                }
+            }
+            currentHighlightStep = (currentHighlightStep + 1) % RAG_STEP_COUNT;
+            highlightRagStep(currentHighlightStep);
+            updateRagControlsUI();
+        }
+
+        // Start the animation interval (used by both initial start and resume)
+        function startRagAnimationInterval() {
+            if (ragAnimationInterval) return; // Already running
+
+            ragAnimationInterval = setInterval(() => {
+                if (!ragAnimationPaused) {
+                    highlightRagStep(currentHighlightStep);
+                    currentHighlightStep = (currentHighlightStep + 1) % RAG_STEP_COUNT;
+                }
+            }, 2500);
+        }
+
+        // Start the RAG pipeline sequential highlight animation
+        function startRagAnimation() {
+            const section1 = document.querySelector('[data-section="1"]');
+            if (!section1) return;
+
+            // Stop any existing animation and reset state
+            stopRagAnimation();
+
+            // Reset pause state for fresh start
+            ragAnimationPaused = false;
+            updateRagControlsUI();
+
+            // Cache elements
+            ragPipelineBoxes = section1.querySelectorAll('.pipeline-box');
+            ragBullets = section1.querySelectorAll('.intro-bullets li');
+
+            // Start animation after initial fade-in completes (2s delay)
+            setTimeout(() => {
+                // Only start if still on section 1 and not paused
+                if (currentIntroSection !== 1) return;
+                if (!ragAnimationPaused) {
+                    startRagAnimationInterval();
+                }
+            }, 2000);
+        }
+
+        // Stop the RAG pipeline animation
+        function stopRagAnimation() {
+            if (ragAnimationInterval) {
+                clearInterval(ragAnimationInterval);
+                ragAnimationInterval = null;
+            }
+            currentHighlightStep = 0;
+            ragAnimationPaused = false;
+
+            // Clear cached elements
+            ragPipelineBoxes = null;
+            ragBullets = null;
+
+            // Clear all highlights
+            const section1 = document.querySelector('[data-section="1"]');
+            if (section1) {
+                section1.querySelectorAll('.pipeline-box').forEach(box =>
+                    box.classList.remove('highlight'));
+                section1.querySelectorAll('.intro-bullets li').forEach(bullet =>
+                    bullet.classList.remove('highlight'));
+                // Also hide all illustrations
+                section1.querySelectorAll('.illust-step').forEach(illust =>
+                    illust.classList.remove('active'));
+            }
+
+            updateRagControlsUI();
+        }
+
+        // Set up RAG control button event listeners
+        function setupRagControls() {
+            const prevBtn = document.getElementById('ragPrevBtn');
+            const playPauseBtn = document.getElementById('ragPlayPauseBtn');
+            const nextBtn = document.getElementById('ragNextBtn');
+
+            if (prevBtn) prevBtn.addEventListener('click', ragPrevStep);
+            if (playPauseBtn) playPauseBtn.addEventListener('click', toggleRagAnimation);
+            if (nextBtn) nextBtn.addEventListener('click', ragNextStep);
+        }
+
+        // Initialize RAG controls
+        setupRagControls();
+
+        // Intro Screen Elements
+        const introScreen = document.getElementById('intro-screen');
+        const appContainer = document.getElementById('app');
+        const introSections = document.querySelectorAll('.intro-section');
+        const introDots = document.querySelectorAll('.intro-nav-dot');
+        const introPrevBtn = document.getElementById('introPrevBtn');
+        const introNextBtn = document.getElementById('introNextBtn');
+
+        // Navigate to a specific intro section
+        function goToSection(sectionNum) {
+            if (sectionNum < 1 || sectionNum > totalIntroSections) return;
+
+            const prevSection = currentIntroSection;
+            currentIntroSection = sectionNum;
+
+            // Update sections
+            introSections.forEach((section, index) => {
+                const num = index + 1;
+                section.classList.remove('active', 'prev');
+                if (num === sectionNum) {
+                    section.classList.add('active');
+                } else if (num < sectionNum) {
+                    section.classList.add('prev');
+                }
+            });
+
+            // Update dots
+            introDots.forEach((dot, index) => {
+                dot.classList.toggle('active', index + 1 === sectionNum);
+            });
+
+            // Update buttons
+            introPrevBtn.disabled = sectionNum === 1;
+            introNextBtn.disabled = sectionNum === totalIntroSections;
+
+            // Start/stop RAG animation based on section
+            if (sectionNum === 1) {
+                startRagAnimation();
+            } else {
+                stopRagAnimation();
+            }
+        }
+
+        function nextSection() {
+            if (currentIntroSection < totalIntroSections) {
+                goToSection(currentIntroSection + 1);
+            }
+        }
+
+        function prevSection() {
+            if (currentIntroSection > 1) {
+                goToSection(currentIntroSection - 1);
+            }
+        }
+
+        // Skip to demo (hide intro, show app)
+        function skipToDemo() {
+            isIntroVisible = false;
+            stopRagAnimation();  // Stop animation when leaving intro
+            introScreen.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            appContainer.classList.add('fade-in');
+
+            // Remove fade-in class after animation
+            setTimeout(() => {
+                appContainer.classList.remove('fade-in');
+            }, 600);
+        }
+
+        // Start demo from intro button
+        function startDemo() {
+            skipToDemo();
+
+            // Pre-fill the demo query and folder
+            const queryInput = document.getElementById('queryInput');
+            const currentPathEl = document.getElementById('currentPath');
+
+            queryInput.value = 'Can we accommodate everyone\'s dietary needs at the venue?';
+            currentFolder = 'data/event_demo';
+            currentPathEl.textContent = currentFolder;
+        }
+
+        // Show intro screen (return from app)
+        function showIntro() {
+            isIntroVisible = true;
+            introScreen.classList.remove('hidden');
+            appContainer.classList.add('hidden');
+            // Reset to first section
+            goToSection(1);
+        }
+
+        // Handle keyboard navigation for intro
+        function handleIntroKeyboard(e) {
+            if (!isIntroVisible) return;
+
+            // Prevent keyboard handling when typing in inputs
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            // On Section 1: Ctrl+Arrow controls RAG animation, Ctrl+Space toggles play/pause
+            if (currentIntroSection === 1 && e.ctrlKey) {
+                switch(e.key) {
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        ragNextStep();
+                        return;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        ragPrevStep();
+                        return;
+                    case ' ':
+                        e.preventDefault();
+                        toggleRagAnimation();
+                        return;
+                }
+            }
+
+            // Standard section navigation (all sections)
+            switch(e.key) {
+                case 'ArrowRight':
+                case ' ':
+                    e.preventDefault();
+                    if (currentIntroSection === totalIntroSections) {
+                        // On last section, space/right starts demo
+                        startDemo();
+                    } else {
+                        nextSection();
+                    }
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    prevSection();
+                    break;
+                case 'Escape':
+                    e.preventDefault();
+                    skipToDemo();
+                    break;
+                case 'h':
+                case 'H':
+                    // H key handled in main keyboard handler
+                    break;
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                    e.preventDefault();
+                    goToSection(parseInt(e.key));
+                    break;
+            }
+        }
+
+        // Add intro keyboard listener
+        document.addEventListener('keydown', handleIntroKeyboard);
+
+        // Start RAG animation on page load (section 1 is active by default)
+        if (currentIntroSection === 1 && isIntroVisible) {
+            startRagAnimation();
+        }
 
         // Tool styles
         const toolStyles = {
@@ -2442,11 +3998,11 @@
             const newSkipped = extractSkippedFiles(data.reason);
             newSkipped.forEach(f => skippedFiles.add(f));
 
-            // Detect backtracking: ONLY explicit backtrack language in the reason
-            // Do NOT auto-detect based on file names - too error prone
+            // Detect backtracking: explicit language OR parsing a previously-skipped file
             const hasExplicitBacktrack = backtrackPattern.test(data.reason);
-            const isBacktracking = hasExplicitBacktrack;
             const isParsing = data.tool_name === 'parse_file' || data.tool_name === 'preview_file' || data.tool_name === 'read';
+            const targetWasSkipped = isParsing && wasSkipped(rawTarget);
+            const isBacktracking = hasExplicitBacktrack || targetWasSkipped;
 
             // Update phase - simpler logic, only move to phase 3 on explicit backtrack
             updatePhase(data.tool_name, data.reason, isBacktracking);
@@ -2728,6 +4284,22 @@
             // SKIP with filename
             processed = processed.replace(/\*\*SKIP\*\*:?\s*-?\s*([^\s,\-\*<]+)/gi, makeFlagReplacer('skip', 'SKIP'));
             processed = processed.replace(/(?<![<"\w])SKIP:?\s*-?\s*([^\s,\-\*<]+)/gi, makeFlagReplacer('skip', 'SKIP'));
+
+            // Bold all filenames (*.pdf, *.md, *.docx, etc.) that aren't already in tags
+            const filenamePattern = /(?<![<"\/])(\b[\w\-\_]+\.(pdf|md|docx?|txt|xlsx?|pptx?|html)\b)/gi;
+            processed = processed.replace(filenamePattern, '<strong>$1</strong>');
+
+            // Highlight eureka moments - key discoveries and cross-references
+            const eurekaPatterns = [
+                /(\bfound critical\b)/gi,
+                /(\bcross-reference[s]?\b)/gi,
+                /(\bbacktrack(?:ing)?\b)/gi,
+                /(\bdiscovered\b)/gi,
+                /(\$0 available)/gi,
+            ];
+            eurekaPatterns.forEach(pattern => {
+                processed = processed.replace(pattern, '<span class="eureka-keyword">$1</span>');
+            });
 
             // 2. Now process remaining markdown (bold/italic)
             let html = processMarkdown(processed);
@@ -3463,6 +5035,9 @@
             // Ignore if typing in input fields
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
+            // Skip most shortcuts if intro is visible (handled by intro keyboard handler)
+            if (isIntroVisible && e.key !== 'h' && e.key !== 'H') return;
+
             switch (e.key.toLowerCase()) {
                 case ' ':
                     e.preventDefault();
@@ -3484,8 +5059,12 @@
                     e.preventDefault();
                     showShortcutsHint();
                     break;
+                case 'h':
+                    e.preventDefault();
+                    showIntro();
+                    break;
                 case 'escape':
-                    // Exit fullscreen mode
+                    // Exit fullscreen mode or return to intro
                     if (document.body.classList.contains('presentation-mode')) {
                         toggleFullscreen();
                     }
