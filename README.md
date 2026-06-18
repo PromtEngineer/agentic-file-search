@@ -24,7 +24,7 @@ This video explains the architecture of the project and how to run it.
 
 - 🔍 **6 Tools**: `scan_folder`, `preview_file`, `parse_file`, `read`, `grep`, `glob`
 - 📄 **Document Support**: PDF, DOCX, PPTX, XLSX, HTML, Markdown (via Docling)
-- 🤖 **Powered by**: Google Gemini 3 Flash with structured JSON output
+- 🤖 **Multi-LLM**: Google Gemini, SiliconFlow, OpenAI-compatible APIs
 - 💰 **Cost Efficient**: ~$0.001 per query with token tracking
 - 🌐 **Web UI**: Real-time WebSocket streaming interface
 - 📊 **Citations**: Answers include source references
@@ -45,13 +45,19 @@ pip install .
 
 ## Configuration
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root (see `.env.example`):
 
 ```bash
+# Google Gemini (default)
+FS_EXPLORER_LLM_PROVIDER=google
 GOOGLE_API_KEY=your_api_key_here
+
+# SiliconFlow (OpenAI-compatible)
+# FS_EXPLORER_LLM_PROVIDER=siliconflow
+# SILICONFLOW_API_KEY=your_api_key_here
 ```
 
-Get your API key from [Google AI Studio](https://aistudio.google.com/apikey).
+See [PROVIDERS.md](PROVIDERS.md) for all supported backends and model overrides.
 
 ## Usage
 
@@ -125,7 +131,7 @@ uv run explore --task "Look in data/large_acquisition/. What happens to employee
 
 | Component | Technology |
 |-----------|------------|
-| LLM | Google Gemini 3 Flash |
+| LLM | Google Gemini / SiliconFlow / OpenAI-compatible |
 | Document Parsing | Docling (local, open-source) |
 | Orchestration | LlamaIndex Workflows |
 | CLI | Typer + Rich |
@@ -136,7 +142,8 @@ uv run explore --task "Look in data/large_acquisition/. What happens to employee
 
 ```
 src/fs_explorer/
-├── agent.py      # Gemini client, token tracking
+├── agent.py      # Agent + tool registry
+├── llm/          # Multi-provider LLM adapters
 ├── workflow.py   # LlamaIndex workflow engine
 ├── fs.py         # File tools: scan, parse, grep
 ├── models.py     # Pydantic models for actions

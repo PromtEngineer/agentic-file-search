@@ -1,8 +1,7 @@
 """
-FsExplorer Agent for filesystem exploration using Google Gemini.
+FsExplorer Agent for filesystem exploration using configurable LLM providers.
 
-This module contains the agent that interacts with the Gemini AI model
-to make decisions about filesystem exploration actions.
+Supports Google Gemini, SiliconFlow, and other OpenAI-compatible APIs.
 """
 
 import os
@@ -12,9 +11,9 @@ from typing import Callable, Any, cast
 from dataclasses import dataclass
 
 from dotenv import load_dotenv
-from google.genai.types import Content, HttpOptions, Part
-from google.genai import Client as GenAIClient
 
+from .llm import ChatMessage, LLMClient, create_llm_client, load_llm_config
+from .llm.action_parser import parse_action_json
 from .models import Action, ActionType, ToolCallAction, Tools
 from .fs import (
     read_file,
@@ -43,9 +42,12 @@ if _env_path.exists():
 # Token Usage Tracking
 # =============================================================================
 
-# Gemini Flash pricing (per million tokens)
-GEMINI_FLASH_INPUT_COST_PER_MILLION = 0.075
-GEMINI_FLASH_OUTPUT_COST_PER_MILLION = 0.30
+# Reference pricing (USD per million tokens) for optional cost estimates.
+_PROVIDER_PRICING: dict[str, tuple[float, float]] = {
+    "google": (0.075, 0.30),
+    "siliconflow": (0.59, 0.59),
+    "openai": (0.15, 0.60),
+}
 
 
 @dataclass
@@ -53,26 +55,39 @@ class TokenUsage:
     """
     Track token usage and costs across the session.
 
-    Maintains running totals of API calls, token counts, and provides
-    cost estimates based on Gemini Flash pricing.
+    Maintains running totals of API calls and token counts. Cost estimates
+    are best-effort and depend on the active provider.
     """
 
     prompt_tokens: int = 0
     completion_tokens: int = 0
     total_tokens: int = 0
     api_calls: int = 0
+    provider_name: str = "google"
+    model_name: str = ""
 
     # Track content sizes
     tool_result_chars: int = 0
     documents_parsed: int = 0
     documents_scanned: int = 0
 
-    def add_api_call(self, prompt_tokens: int, completion_tokens: int) -> None:
+    def add_api_call(
+        self,
+        prompt_tokens: int,
+        completion_tokens: int,
+        *,
+        provider_name: str | None = None,
+        model_name: str | None = None,
+    ) -> None:
         """Record token usage from an API call."""
         self.prompt_tokens += prompt_tokens
         self.completion_tokens += completion_tokens
         self.total_tokens += prompt_tokens + completion_tokens
         self.api_calls += 1
+        if provider_name:
+            self.provider_name = provider_name
+        if model_name:
+            self.model_name = model_name
 
     def add_tool_result(self, result: str, tool_name: str) -> None:
         """Record metrics from a tool execution."""
@@ -85,24 +100,36 @@ class TokenUsage:
         elif tool_name == "preview_file":
             self.documents_parsed += 1
 
-    def _calculate_cost(self) -> tuple[float, float, float]:
-        """Calculate estimated costs based on Gemini Flash pricing."""
-        input_cost = (
-            self.prompt_tokens / 1_000_000
-        ) * GEMINI_FLASH_INPUT_COST_PER_MILLION
-        output_cost = (
-            self.completion_tokens / 1_000_000
-        ) * GEMINI_FLASH_OUTPUT_COST_PER_MILLION
+    def _calculate_cost(self) -> tuple[float, float, float] | None:
+        """Calculate estimated costs when provider pricing is known."""
+        pricing = _PROVIDER_PRICING.get(self.provider_name)
+        if pricing is None:
+            return None
+        input_rate, output_rate = pricing
+        input_cost = (self.prompt_tokens / 1_000_000) * input_rate
+        output_cost = (self.completion_tokens / 1_000_000) * output_rate
         return input_cost, output_cost, input_cost + output_cost
 
     def summary(self) -> str:
         """Generate a formatted summary of token usage and costs."""
-        input_cost, output_cost, total_cost = self._calculate_cost()
+        costs = self._calculate_cost()
+        cost_block = ""
+        if costs is not None:
+            input_cost, output_cost, total_cost = costs
+            cost_block = (
+                f"───────────────────────────────────────────────────────────────\n"
+                f"  Est. Cost ({self.provider_name} / {self.model_name or 'default'}):\n"
+                f"    Input:  ${input_cost:.4f}\n"
+                f"    Output: ${output_cost:.4f}\n"
+                f"    Total:  ${total_cost:.4f}\n"
+            )
 
         return f"""
 ═══════════════════════════════════════════════════════════════
                       TOKEN USAGE SUMMARY
 ═══════════════════════════════════════════════════════════════
+  Provider:            {self.provider_name}
+  Model:               {self.model_name or "n/a"}
   API Calls:           {self.api_calls}
   Prompt Tokens:       {self.prompt_tokens:,}
   Completion Tokens:   {self.completion_tokens:,}
@@ -111,12 +138,7 @@ class TokenUsage:
   Documents Scanned:   {self.documents_scanned}
   Documents Parsed:    {self.documents_parsed}
   Tool Result Chars:   {self.tool_result_chars:,}
-───────────────────────────────────────────────────────────────
-  Est. Cost (Gemini Flash):
-    Input:  ${input_cost:.4f}
-    Output: ${output_cost:.4f}
-    Total:  ${total_cost:.4f}
-═══════════════════════════════════════════════════════════════
+{cost_block}═══════════════════════════════════════════════════════════════
 """
 
 
@@ -540,7 +562,7 @@ def _build_system_prompt(enable_semantic: bool, enable_metadata: bool) -> str:
 
 class FsExplorerAgent:
     """
-    AI agent for exploring filesystems using Google Gemini.
+    AI agent for exploring filesystems using a configurable LLM provider.
 
     The agent maintains a conversation history with the LLM and uses
     structured JSON output to make decisions about which actions to take.
@@ -549,31 +571,42 @@ class FsExplorerAgent:
         token_usage: Tracks API call statistics and costs.
     """
 
-    def __init__(self, api_key: str | None = None) -> None:
+    def __init__(
+        self,
+        api_key: str | None = None,
+        *,
+        llm_client: LLMClient | None = None,
+    ) -> None:
         """
-        Initialize the agent with Google API credentials.
+        Initialize the agent with provider credentials from env or args.
 
         Args:
-            api_key: Google API key. If not provided, reads from
-                     GOOGLE_API_KEY environment variable.
+            api_key: Optional API key override for the active provider.
+            llm_client: Optional pre-built LLM client (used in tests).
 
         Raises:
-            ValueError: If no API key is available.
+            ValueError: If provider configuration or API key is missing.
         """
-        if api_key is None:
-            api_key = os.getenv("GOOGLE_API_KEY")
-        if api_key is None:
-            raise ValueError(
-                "GOOGLE_API_KEY not found within the current environment: "
-                "please export it or provide it to the class constructor."
-            )
+        if llm_client is not None:
+            self._llm = llm_client
+        else:
+            self._llm = create_llm_client(api_key=api_key)
 
-        self._client = GenAIClient(
-            api_key=api_key,
-            http_options=HttpOptions(api_version="v1beta"),
+        config = (
+            load_llm_config(api_key=api_key)
+            if llm_client is None
+            else None
         )
-        self._chat_history: list[Content] = []
-        self.token_usage = TokenUsage()
+        self._chat_history: list[ChatMessage] = []
+        self.token_usage = TokenUsage(
+            provider_name=self._llm.provider_name,
+            model_name=config.model if config else self._llm.model_name,
+        )
+
+    @property
+    def llm_client(self) -> LLMClient:
+        """Return the active LLM backend."""
+        return self._llm
 
     def configure_task(self, task: str) -> None:
         """
@@ -582,51 +615,53 @@ class FsExplorerAgent:
         Args:
             task: The task or context to add to the conversation.
         """
-        self._chat_history.append(
-            Content(role="user", parts=[Part.from_text(text=task)])
-        )
+        self._chat_history.append(ChatMessage(role="user", content=task))
 
     async def take_action(self) -> tuple[Action, ActionType] | None:
         """
         Request the next action from the AI model.
 
-        Sends the current conversation history to Gemini and receives
-        a structured JSON response indicating the next action to take.
+        Sends the current conversation history to the configured provider and
+        receives a structured JSON response indicating the next action.
 
         Returns:
             A tuple of (Action, ActionType) if successful, None otherwise.
         """
-        response = await self._client.aio.models.generate_content(
-            model="gemini-3-flash-preview",
-            contents=self._chat_history,  # type: ignore
-            config={
-                "system_instruction": _build_system_prompt(_ENABLE_SEMANTIC, _ENABLE_METADATA),
-                "response_mime_type": "application/json",
-                "response_schema": Action,
-            },
+        try:
+            response_text, usage = await self._llm.generate_action_json(
+                messages=self._chat_history,
+                system_instruction=_build_system_prompt(
+                    _ENABLE_SEMANTIC, _ENABLE_METADATA
+                ),
+            )
+        except Exception as exc:
+            print(f"LLM request failed ({self._llm.provider_name}): {exc}")
+            return None
+
+        self.token_usage.add_api_call(
+            prompt_tokens=usage.prompt_tokens,
+            completion_tokens=usage.completion_tokens,
+            provider_name=self._llm.provider_name,
+            model_name=self._llm.model_name,
         )
 
-        # Track token usage from response metadata
-        if response.usage_metadata:
-            self.token_usage.add_api_call(
-                prompt_tokens=response.usage_metadata.prompt_token_count or 0,
-                completion_tokens=response.usage_metadata.candidates_token_count or 0,
+        self._chat_history.append(
+            ChatMessage(role="assistant", content=response_text)
+        )
+
+        try:
+            action, action_type = parse_action_json(response_text)
+        except ValueError as exc:
+            print(f"Failed to parse LLM response: {exc}")
+            return None
+
+        if action_type == "toolcall":
+            toolcall = cast(ToolCallAction, action.action)
+            self.call_tool(
+                tool_name=toolcall.tool_name,
+                tool_input=toolcall.to_fn_args(),
             )
-
-        if response.candidates is not None:
-            if response.candidates[0].content is not None:
-                self._chat_history.append(response.candidates[0].content)
-            if response.text is not None:
-                action = Action.model_validate_json(response.text)
-                if action.to_action_type() == "toolcall":
-                    toolcall = cast(ToolCallAction, action.action)
-                    self.call_tool(
-                        tool_name=toolcall.tool_name,
-                        tool_input=toolcall.to_fn_args(),
-                    )
-                return action, action.to_action_type()
-
-        return None
+        return action, action_type
 
     def call_tool(self, tool_name: Tools, tool_input: dict[str, Any]) -> None:
         """
@@ -648,15 +683,16 @@ class FsExplorerAgent:
         self.token_usage.add_tool_result(result, tool_name)
 
         self._chat_history.append(
-            Content(
+            ChatMessage(
                 role="user",
-                parts=[
-                    Part.from_text(text=f"Tool result for {tool_name}:\n\n{result}")
-                ],
+                content=f"Tool result for {tool_name}:\n\n{result}",
             )
         )
 
     def reset(self) -> None:
         """Reset the agent's conversation history and token tracking."""
         self._chat_history.clear()
-        self.token_usage = TokenUsage()
+        self.token_usage = TokenUsage(
+            provider_name=self._llm.provider_name,
+            model_name=self._llm.model_name,
+        )

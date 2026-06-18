@@ -13,6 +13,7 @@ dependencies = [
     "duckdb>=1.0.0",
     "fastapi>=0.115.0",
     "google-genai>=1.55.0",
+    "openai>=1.60.0",
     "langextract>=1.0.0",
     "llama-index-workflows>=2.11.5",
     "python-dotenv>=1.0.0",
